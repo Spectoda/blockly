@@ -4,10 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.trashcan');
+goog.declareModuleId('Blockly.test.trashcan');
 
-const {assertEventFired, assertEventNotFired, defineBasicBlockWithField, defineRowBlock, defineStatementBlock, defineStackBlock, defineMutatorBlocks, sharedTestSetup, sharedTestTeardown, simulateClick} = goog.require('Blockly.test.helpers');
-const eventUtils = goog.require('Blockly.Events.utils');
+import {assertEventFired, assertEventNotFired} from './test_helpers/events.js';
+import {sharedTestSetup, sharedTestTeardown} from './test_helpers/setup_teardown.js';
+import {defineBasicBlockWithField, defineMutatorBlocks, defineRowBlock, defineStackBlock, defineStatementBlock} from './test_helpers/block_definitions.js';
+import * as eventUtils from '../../build/src/core/events/utils.js';
+import {simulateClick} from './test_helpers/user_input.js';
 
 
 suite("Trashcan", function() {
@@ -77,10 +80,10 @@ suite("Trashcan", function() {
       simulateClick(this.trashcan.svgGroup_);
 
       assertEventNotFired(
-          this.eventsFireStub, Blockly.Events.TrashcanOpen, {});
+          this.eventsFireStub, Blockly.Events.TrashcanOpen, {type: eventUtils.CLICK});
       assertEventFired(
-          this.eventsFireStub, Blockly.Events.Click, {targetType: 'workspace'},
-          this.workspace.id, null);
+          this.eventsFireStub, Blockly.Events.Click, {targetType: 'workspace', type: eventUtils.CLICK},
+          this.workspace.id, undefined);
     });
     test("Click with contents - fires trashcanOpen", function() {
       fireDeleteEvent(this.workspace, '<block type="test_field_block"/>');
@@ -94,9 +97,9 @@ suite("Trashcan", function() {
 
       assertEventFired(
           this.eventsFireStub, Blockly.Events.TrashcanOpen,
-          {isOpen: true}, this.workspace.id);
+          {isOpen: true, type: eventUtils.TRASHCAN_OPEN}, this.workspace.id);
       assertEventNotFired(
-          this.eventsFireStub, Blockly.Events.Click, {});
+          this.eventsFireStub, Blockly.Events.Click, {type: eventUtils.TRASHCAN_OPEN});
     });
     test("Click outside trashcan - fires trashcanClose", function() {
       sinon.stub(this.trashcan.flyout, 'isVisible').returns(true);
@@ -109,10 +112,10 @@ suite("Trashcan", function() {
 
       assertEventFired(
           this.eventsFireStub, Blockly.Events.TrashcanOpen,
-          {isOpen: false}, this.workspace.id);
+          {isOpen: false, type: eventUtils.TRASHCAN_OPEN}, this.workspace.id);
       assertEventFired(
-          this.eventsFireStub, Blockly.Events.Click, {targetType: 'workspace'},
-          this.workspace.id, null);
+          this.eventsFireStub, Blockly.Events.Click, {targetType: 'workspace', type: eventUtils.CLICK},
+          this.workspace.id, undefined);
     });
   });
   suite("Unique Contents", function() {

@@ -4,19 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.fieldRegistry');
+goog.declareModuleId('Blockly.test.fieldRegistry');
 
-const {createDeprecationWarningStub, sharedTestSetup, sharedTestTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {createDeprecationWarningStub} from './test_helpers/warnings.js';
+import {sharedTestSetup, sharedTestTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Field Registry', function() {
-  function CustomFieldType(value) {
-    CustomFieldType.superClass_.constructor.call(this, value);
+  class CustomFieldType extends Blockly.Field {
+    constructor(value) {
+      super(value);
+    }
+
+    static fromJson(options) {
+      return new CustomFieldType(options['value']);
+    }
   }
-  Blockly.utils.object.inherits(CustomFieldType, Blockly.Field);
-  CustomFieldType.fromJson = function(options) {
-    return new CustomFieldType(options['value']);
-  };
 
   setup(function() {
     sharedTestSetup.call(this);
@@ -89,7 +93,7 @@ suite('Field Registry', function() {
       };
 
       const field = Blockly.fieldRegistry.fromJson(json);
-      
+
       chai.assert.isNotNull(field);
       chai.assert.equal(field.getValue(), 'ok');
     });

@@ -123,6 +123,8 @@ def main():
 
 'use strict';
 
+var Blockly = Blockly || {{ Msg: Object.create(null) }};
+
 """.format(target_lang.replace('-', '.')))
         # For each key in the source language file, output the target value
         # if present; otherwise, output the source language value with a

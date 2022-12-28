@@ -10,7 +10,7 @@
 #
 # (TODO(#5007): Should fetch this from scripts/gulpfiles/config.js
 # instead of hardcoding it here.
-readonly BUILD_DIR='build'
+readonly RELEASE_DIR='dist'
 
 # These values should be updated with each release.  (Note that the
 # historic values are tab-delimited.)
@@ -28,7 +28,12 @@ readonly BUILD_DIR='build'
 # Q3 2021	6.20210701.0	731695 (mid-quarter goog.module conversion)
 # Q3 2021	6.20210701.0	808807 (late-quarter goog.module conversion)
 # Q4 2021	7.20211209.0-beta.0	920002
-readonly BLOCKLY_SIZE_EXPECTED=920002
+# Q4 2021	7.20211209.0	929665
+# Q2 2022	8.0.0	  928056
+# Q3 2022	8.0.0	1040413 (mid-quarter typescript conversion)
+# Q4 2022	8.0.0	  870104
+# Q4 2022	9.1.1	  903357
+readonly BLOCKLY_SIZE_EXPECTED=  903357
 
 # Size of blocks_compressed.js
 # Q2 2019	2.20190722.0	75618
@@ -42,7 +47,12 @@ readonly BLOCKLY_SIZE_EXPECTED=920002
 # Q2 2021	6.20210701.0	76669
 # Q3 2021	6.20210701.0	76669
 # Q4 2021	7.20211209.0-beta.0	82054
-readonly BLOCKS_SIZE_EXPECTED=82054
+# Q4 2021	7.20211209.0	86966
+# Q2 2022	8.0.0	   90769
+# Q3 2022	8.0.0	102176 (mid-quarter typescript conversion)
+# Q4 2022	8.0.0	  102213
+# Q4 2022	9.1.1	  102190
+readonly BLOCKS_SIZE_EXPECTED=  102190
 
 # Size of blockly_compressed.js.gz
 # Q2 2019	2.20190722.0	180925
@@ -57,7 +67,12 @@ readonly BLOCKS_SIZE_EXPECTED=82054
 # Q3 2021	6.20210701.0	147476 (mid-quarter goog.module conversion)
 # Q3 2021	6.20210701.0	152025 (late-quarter goog.module conversion)
 # Q4 2021	7.20211209.0-beta.0	169863
-readonly BLOCKLY_GZ_SIZE_EXPECTED=169863
+# Q4 2021	7.20211209.0	171759
+# Q2 2022	8.0.0	  173997
+# Q3 2022	8.0.0	185766 (mid-quarter typescript conversion)
+# Q4 2022	8.0.0	  175140
+# Q4 2022	9.1.1	  179306
+readonly BLOCKLY_GZ_SIZE_EXPECTED=  179306
 
 # Size of blocks_compressed.js.gz
 # Q2 2019	2.20190722.0	14552
@@ -71,7 +86,12 @@ readonly BLOCKLY_GZ_SIZE_EXPECTED=169863
 # Q2 2021	6.20210701.0	15275
 # Q3 2021	6.20210701.0	15284
 # Q4 2021	7.20211209.0-beta.0	16616
-readonly BLOCKS_GZ_SIZE_EXPECTED=16616
+# Q4 2021	7.20211209.0	15760
+# Q2 2022	8.0.0	   16192
+# Q3 2022	8.0.0	17016 (mid-quarter typescript conversion)
+# Q4 2022	8.0.0	   17188
+# Q4 2022	9.1.1	   17182
+readonly BLOCKS_GZ_SIZE_EXPECTED=   17182
 
 # ANSI colors
 readonly BOLD_GREEN='\033[1;32m'
@@ -89,8 +109,8 @@ trap fail ERR
 # GZip them for additional size comparisons (keep originals, force
 # overwite previously-gzipped copies).
 echo "Zipping the compressed files"
-gzip -kf "${BUILD_DIR}/blockly_compressed.js"
-gzip -kf "${BUILD_DIR}/blocks_compressed.js"
+gzip -kf "${RELEASE_DIR}/blockly_compressed.js"
+gzip -kf "${RELEASE_DIR}/blocks_compressed.js"
 
 # Check the sizes of the files
 
@@ -114,9 +134,9 @@ compare_size() {
   fi
 }
 
-compare_size "${BUILD_DIR}/blockly_compressed.js" $BLOCKLY_SIZE_EXPECTED
-compare_size "${BUILD_DIR}/blocks_compressed.js" $BLOCKS_SIZE_EXPECTED
-compare_size "${BUILD_DIR}/blockly_compressed.js.gz" $BLOCKLY_GZ_SIZE_EXPECTED
-compare_size "${BUILD_DIR}/blocks_compressed.js.gz" $BLOCKS_GZ_SIZE_EXPECTED
+compare_size "${RELEASE_DIR}/blockly_compressed.js" $BLOCKLY_SIZE_EXPECTED
+compare_size "${RELEASE_DIR}/blocks_compressed.js" $BLOCKS_SIZE_EXPECTED
+compare_size "${RELEASE_DIR}/blockly_compressed.js.gz" $BLOCKLY_GZ_SIZE_EXPECTED
+compare_size "${RELEASE_DIR}/blocks_compressed.js.gz" $BLOCKS_GZ_SIZE_EXPECTED
 
 exit $has_failed

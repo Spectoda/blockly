@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.contextMenuItem');
+goog.declareModuleId('Blockly.test.contextMenuItem');
 
-const {sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Context Menu Items', function() {
@@ -17,10 +17,9 @@ suite('Context Menu Items', function() {
     const toolbox = document.getElementById('toolbox-categories');
     this.workspace = Blockly.inject('blocklyDiv', {toolbox: toolbox});
 
-    // Declare a new registry to ensure default options are called.
-    new Blockly.ContextMenuRegistry();
-    Blockly.ContextMenuItems.registerDefaultOptions();
     this.registry = Blockly.ContextMenuRegistry.registry;
+    this.registry.reset();
+    Blockly.ContextMenuItems.registerDefaultOptions();
   });
 
   teardown(function() {
@@ -261,7 +260,7 @@ suite('Context Menu Items', function() {
       test('Deletes all blocks after confirming', function() {
         // Mocks the confirmation dialog and calls the callback with 'true' simulating ok.
         const confirmStub = sinon.stub(
-          Blockly.dialog, 'confirm').callsArgWith(1, true);
+          Blockly.dialog.TEST_ONLY, 'confirmInternal').callsArgWith(1, true);
 
         this.workspace.newBlock('text');
         this.workspace.newBlock('text');
@@ -274,7 +273,7 @@ suite('Context Menu Items', function() {
       test('Does not delete blocks if not confirmed', function() {
         // Mocks the confirmation dialog and calls the callback with 'false' simulating cancel.
         const confirmStub = sinon.stub(
-          Blockly.dialog, 'confirm').callsArgWith(1, false);
+          Blockly.dialog.TEST_ONLY, 'confirmInternal').callsArgWith(1, false);
 
         this.workspace.newBlock('text');
         this.workspace.newBlock('text');
@@ -285,7 +284,7 @@ suite('Context Menu Items', function() {
       });
 
       test('No dialog for single block', function() {
-        const confirmStub = sinon.stub(Blockly.dialog, 'confirm');
+        const confirmStub = sinon.stub(Blockly.dialog.TEST_ONLY, 'confirmInternal');
         this.workspace.newBlock('text');
         this.deleteOption.callback(this.scope);
         this.clock.runAll();
@@ -335,7 +334,7 @@ suite('Context Menu Items', function() {
       });
 
       test('Calls duplicate', function() {
-        const spy = sinon.spy(Blockly.clipboard, 'duplicate');
+        const spy = sinon.spy(Blockly.clipboard.TEST_ONLY, 'duplicateInternal');
 
         this.duplicateOption.callback(this.scope);
 
@@ -355,16 +354,6 @@ suite('Context Menu Items', function() {
 
       test('Enabled for normal block', function() {
         chai.assert.equal(this.commentOption.preconditionFn(this.scope), 'enabled');
-      });
-
-      test('Hidden for IE', function() {
-        const oldState = Blockly.utils.userAgent.IE;
-        try {
-          Blockly.utils.userAgent.IE = true;
-          chai.assert.equal(this.commentOption.preconditionFn(this.scope), 'hidden');
-        } finally {
-          Blockly.utils.userAgent.IE = oldState;
-        }
       });
 
       test('Hidden for collapsed block', function() {

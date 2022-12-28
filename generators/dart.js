@@ -11,12 +11,11 @@
 'use strict';
 
 goog.module('Blockly.Dart');
-goog.module.declareLegacyNamespace();
 
 const Variables = goog.require('Blockly.Variables');
 const stringUtils = goog.require('Blockly.utils.string');
 const {Block} = goog.requireType('Blockly.Block');
-const {Generator} = goog.require('Blockly.Generator');
+const {CodeGenerator} = goog.require('Blockly.CodeGenerator');
 const {Names, NameType} = goog.require('Blockly.Names');
 const {Workspace} = goog.requireType('Blockly.Workspace');
 const {inputTypes} = goog.require('Blockly.inputTypes');
@@ -24,9 +23,9 @@ const {inputTypes} = goog.require('Blockly.inputTypes');
 
 /**
  * Dart code generator.
- * @type {!Generator}
+ * @type {!CodeGenerator}
  */
-const Dart = new Generator('Dart');
+const Dart = new CodeGenerator('Dart');
 
 /**
  * List of illegal variable names.
@@ -87,7 +86,7 @@ Dart.isInitialized = false;
  * @param {!Workspace} workspace Workspace to generate code from.
  */
 Dart.init = function(workspace) {
-  // Call Blockly.Generator's init.
+  // Call Blockly.CodeGenerator's init.
   Object.getPrototypeOf(this).init.call(this);
 
   if (!this.nameDB_) {
@@ -146,7 +145,7 @@ Dart.finish = function(code) {
       definitions.push(def);
     }
   }
-  // Call Blockly.Generator's finish.
+  // Call Blockly.CodeGenerator's finish.
   code = Object.getPrototypeOf(this).finish.call(this, code);
   this.isInitialized = false;
 
@@ -301,4 +300,4 @@ Dart.getAdjusted = function(block, atId, opt_delta, opt_negate,
   return at;
 };
 
-exports = Dart;
+exports.dartGenerator = Dart;

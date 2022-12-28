@@ -11,9 +11,9 @@
 
 goog.module('Blockly.Python.loops');
 
-const Python = goog.require('Blockly.Python');
 const stringUtils = goog.require('Blockly.utils.string');
 const {NameType} = goog.require('Blockly.Names');
+const {pythonGenerator: Python} = goog.require('Blockly.Python');
 
 
 Python['controls_repeat_ext'] = function(block) {
@@ -70,16 +70,20 @@ Python['controls_for'] = function(block) {
 
   // Helper functions.
   const defineUpRange = function() {
-    return Python.provideFunction_('upRange', [
-      'def ' + Python.FUNCTION_NAME_PLACEHOLDER_ + '(start, stop, step):',
-      '  while start <= stop:', '    yield start', '    start += abs(step)'
-    ]);
+    return Python.provideFunction_('upRange', `
+def ${Python.FUNCTION_NAME_PLACEHOLDER_}(start, stop, step):
+  while start <= stop:
+    yield start
+    start += abs(step)
+`);
   };
   const defineDownRange = function() {
-    return Python.provideFunction_('downRange', [
-      'def ' + Python.FUNCTION_NAME_PLACEHOLDER_ + '(start, stop, step):',
-      '  while start >= stop:', '    yield start', '    start -= abs(step)'
-    ]);
+    return Python.provideFunction_('downRange', `
+def ${Python.FUNCTION_NAME_PLACEHOLDER_}(start, stop, step):
+  while start >= stop:
+    yield start
+    start -= abs(step)
+`);
   };
   // Arguments are legal Python code (numbers or strings returned by scrub()).
   const generateUpDownRange = function(start, end, inc) {
@@ -130,14 +134,11 @@ Python['controls_for'] = function(block) {
       if (stringUtils.isNumber(arg)) {
         // Simple number.
         arg = Number(arg);
-      } else if (arg.match(/^\w+$/)) {
-        // Variable.
-        arg = 'float(' + arg + ')';
-      } else {
-        // It's complicated.
+      } else if (!arg.match(/^\w+$/)) {
+        // Not a variable, it's complicated.
         const varName = Python.nameDB_.getDistinctName(
             variable0 + suffix, NameType.VARIABLE);
-        code += varName + ' = float(' + arg + ')\n';
+        code += varName + ' = ' + arg + '\n';
         arg = varName;
       }
       return arg;

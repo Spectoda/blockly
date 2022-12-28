@@ -10,7 +10,7 @@
  */
 'use strict';
 
-goog.module('Blockly.blocks.texts');
+goog.module('Blockly.libraryBlocks.texts');
 
 const Extensions = goog.require('Blockly.Extensions');
 const {Msg} = goog.require('Blockly.Msg');
@@ -19,7 +19,10 @@ const xmlUtils = goog.require('Blockly.utils.xml');
 const {Align} = goog.require('Blockly.Input');
 /* eslint-disable-next-line no-unused-vars */
 const {Block} = goog.requireType('Blockly.Block');
-const {Blocks} = goog.require('Blockly.blocks');
+// const {BlockDefinition} = goog.requireType('Blockly.blocks');
+// TODO (6248): Properly import the BlockDefinition type.
+/* eslint-disable-next-line no-unused-vars */
+const BlockDefinition = Object;
 const {ConnectionType} = goog.require('Blockly.ConnectionType');
 const {FieldDropdown} = goog.require('Blockly.FieldDropdown');
 const {FieldImage} = goog.require('Blockly.FieldImage');
@@ -27,14 +30,18 @@ const {FieldTextInput} = goog.require('Blockly.FieldTextInput');
 const {Mutator} = goog.require('Blockly.Mutator');
 /* eslint-disable-next-line no-unused-vars */
 const {Workspace} = goog.requireType('Blockly.Workspace');
-const {defineBlocksWithJsonArray} = goog.require('Blockly.common');
+const {createBlockDefinitionsFromJsonArray, defineBlocks} = goog.require('Blockly.common');
 /** @suppress {extraRequire} */
 goog.require('Blockly.FieldMultilineInput');
 /** @suppress {extraRequire} */
 goog.require('Blockly.FieldVariable');
 
 
-defineBlocksWithJsonArray([
+/**
+ * A dictionary of the block definitions provided by this module.
+ * @type {!Object<string, !BlockDefinition>}
+ */
+const blocks = createBlockDefinitionsFromJsonArray([
   // Block for text value
   {
     'type': 'text',
@@ -238,8 +245,9 @@ defineBlocksWithJsonArray([
     'mutator': 'text_charAt_mutator',
   },
 ]);
+exports.blocks = blocks;
 
-Blocks['text_getSubstring'] = {
+blocks['text_getSubstring'] = {
   /**
    * Block for getting substring.
    * @this {Block}
@@ -335,7 +343,7 @@ Blocks['text_getSubstring'] = {
         /**
          * @param {*} value The input value.
          * @this {FieldDropdown}
-         * @returns {null|undefined} Null if the field has been replaced;
+         * @return {null|undefined} Null if the field has been replaced;
          *     otherwise undefined.
          */
         function(value) {
@@ -363,7 +371,7 @@ Blocks['text_getSubstring'] = {
   },
 };
 
-Blocks['text_changeCase'] = {
+blocks['text_changeCase'] = {
   /**
    * Block for changing capitalization.
    * @this {Block}
@@ -383,7 +391,7 @@ Blocks['text_changeCase'] = {
   },
 };
 
-Blocks['text_trim'] = {
+blocks['text_trim'] = {
   /**
    * Block for trimming spaces.
    * @this {Block}
@@ -403,7 +411,7 @@ Blocks['text_trim'] = {
   },
 };
 
-Blocks['text_print'] = {
+blocks['text_print'] = {
   /**
    * Block for print statement.
    * @this {Block}
@@ -463,7 +471,7 @@ const TEXT_PROMPT_COMMON = {
   },
 };
 
-Blocks['text_prompt_ext'] = {
+blocks['text_prompt_ext'] = {
   ...TEXT_PROMPT_COMMON,
   /**
    * Block for prompt function (external message).
@@ -496,7 +504,7 @@ Blocks['text_prompt_ext'] = {
   // XML hooks are kept for backwards compatibility.
 };
 
-Blocks['text_prompt'] = {
+blocks['text_prompt'] = {
   ...TEXT_PROMPT_COMMON,
   /**
    * Block for prompt function (internal message).
@@ -531,7 +539,7 @@ Blocks['text_prompt'] = {
   },
 };
 
-Blocks['text_count'] = {
+blocks['text_count'] = {
   /**
    * Block for counting how many times one string appears within another string.
    * @this {Block}
@@ -560,7 +568,7 @@ Blocks['text_count'] = {
   },
 };
 
-Blocks['text_replace'] = {
+blocks['text_replace'] = {
   /**
    * Block for replacing one string with another in the text.
    * @this {Block}
@@ -594,7 +602,7 @@ Blocks['text_replace'] = {
   },
 };
 
-Blocks['text_reverse'] = {
+blocks['text_reverse'] = {
   /**
    * Block for reversing a string.
    * @this {Block}
@@ -775,10 +783,13 @@ const TEXT_JOIN_MUTATOR_MIXIN = {
     let itemBlock = containerBlock.getInputTargetBlock('STACK');
     // Count number of inputs.
     const connections = [];
-    while (itemBlock && !itemBlock.isInsertionMarker()) {
+    while (itemBlock) {
+      if (itemBlock.isInsertionMarker()) {
+        itemBlock = itemBlock.getNextBlock();
+        continue;
+      }
       connections.push(itemBlock.valueConnection_);
-      itemBlock =
-          itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
+      itemBlock = itemBlock.getNextBlock();
     }
     // Disconnect any children that don't belong.
     for (let i = 0; i < this.itemCount_; i++) {
@@ -803,10 +814,13 @@ const TEXT_JOIN_MUTATOR_MIXIN = {
     let itemBlock = containerBlock.getInputTargetBlock('STACK');
     let i = 0;
     while (itemBlock) {
+      if (itemBlock.isInsertionMarker()) {
+        itemBlock = itemBlock.getNextBlock();
+        continue;
+      }
       const input = this.getInput('ADD' + i);
       itemBlock.valueConnection_ = input && input.connection.targetConnection;
-      itemBlock =
-          itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
+      itemBlock = itemBlock.getNextBlock();
       i++;
     }
   },
@@ -850,7 +864,7 @@ const TEXT_JOIN_EXTENSION = function() {
   this.itemCount_ = 2;
   this.updateShape_();
   // Configure the mutator UI.
-  this.setMutator(new Mutator(['text_create_join_item']));
+  this.setMutator(new Mutator(['text_create_join_item'], this));
 };
 
 // Update the tooltip of 'text_append' block to reference the variable.
@@ -981,3 +995,6 @@ Extensions.registerMutator(
 
 Extensions.registerMutator(
     'text_charAt_mutator', TEXT_CHARAT_MUTATOR_MIXIN, TEXT_CHARAT_EXTENSION);
+
+// Register provided blocks.
+defineBlocks(blocks);

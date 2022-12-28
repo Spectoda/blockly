@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.xml');
+goog.declareModuleId('Blockly.test.xml');
 
-const {addBlockTypeToCleanup, assertVariableValues, createGenUidStubWithReturns, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import {addBlockTypeToCleanup, createGenUidStubWithReturns, sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
+import {assertVariableValues} from './test_helpers/variables.js';
 
 
 suite('XML', function() {

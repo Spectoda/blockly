@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.fieldCheckbox');
+goog.declareModuleId('Blockly.test.fieldCheckbox');
 
-const {defineRowBlock, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {assertFieldValue, runConstructorSuiteTests, runFromJsonSuiteTests, runSetValueTests} from './test_helpers/fields.js';
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
+import {defineRowBlock} from './test_helpers/block_definitions.js';
 
 
 suite('Checkbox Fields', function() {
@@ -61,7 +64,7 @@ suite('Checkbox Fields', function() {
    * @param {!Blockly.FieldCheckbox} field The field to check.
    */
   const assertFieldDefault = function(field) {
-    testHelpers.assertFieldValue(
+    assertFieldValue(
         field, defaultFieldValue, defaultFieldValue.toLowerCase());
   };
   /**
@@ -70,15 +73,15 @@ suite('Checkbox Fields', function() {
    * @param {!FieldValueTestCase} testCase The test case.
    */
   const validTestCaseAssertField = function(field, testCase) {
-    testHelpers.assertFieldValue(
+    assertFieldValue(
         field, testCase.expectedValue, testCase.expectedValue.toLowerCase());
   };
 
-  testHelpers.runConstructorSuiteTests(
+  runConstructorSuiteTests(
       Blockly.FieldCheckbox, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
-  testHelpers.runFromJsonSuiteTests(
+  runFromJsonSuiteTests(
       Blockly.FieldCheckbox, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
@@ -87,14 +90,14 @@ suite('Checkbox Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldCheckbox('TRUE');
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, 'TRUE', 'true');
     });
     suite('False -> New Value', function() {
       setup(function() {
         this.field = new Blockly.FieldCheckbox('FALSE');
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, 'FALSE', 'false');
     });
   });
@@ -131,7 +134,7 @@ suite('Checkbox Fields', function() {
         });
         test('New Value', function() {
           this.field.setValue(suiteInfo.value);
-          testHelpers.assertFieldValue(
+          assertFieldValue(
               this.field, suiteInfo.expectedValue,
               String(suiteInfo.expectedValue).toLowerCase());
         });
@@ -214,7 +217,7 @@ suite('Checkbox Fields', function() {
     setup(function() {
       this.workspace = new Blockly.Workspace();
       defineRowBlock();
-      
+
       this.assertValue = (value) => {
         const block = this.workspace.newBlock('row_block');
         const field = new Blockly.FieldCheckbox(value);

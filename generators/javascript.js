@@ -11,14 +11,11 @@
 'use strict';
 
 goog.module('Blockly.JavaScript');
-goog.module.declareLegacyNamespace();
 
 const Variables = goog.require('Blockly.Variables');
-const objectUtils = goog.require('Blockly.utils.object');
 const stringUtils = goog.require('Blockly.utils.string');
 const {Block} = goog.requireType('Blockly.Block');
-const {Generator} = goog.require('Blockly.Generator');
-const {globalThis} = goog.require('Blockly.utils.global');
+const {CodeGenerator} = goog.require('Blockly.CodeGenerator');
 const {inputTypes} = goog.require('Blockly.inputTypes');
 const {Names, NameType} = goog.require('Blockly.Names');
 const {Workspace} = goog.requireType('Blockly.Workspace');
@@ -26,9 +23,9 @@ const {Workspace} = goog.requireType('Blockly.Workspace');
 
 /**
  * JavaScript code generator.
- * @type {!Generator}
+ * @type {!CodeGenerator}
  */
-const JavaScript = new Generator('JavaScript');
+const JavaScript = new CodeGenerator('JavaScript');
 
 /**
  * List of illegal variable names.
@@ -130,7 +127,7 @@ JavaScript.isInitialized = false;
  * @param {!Workspace} workspace Workspace to generate code from.
  */
 JavaScript.init = function(workspace) {
-  // Call Blockly.Generator's init.
+  // Call Blockly.CodeGenerator's init.
   Object.getPrototypeOf(this).init.call(this);
 
   if (!this.nameDB_) {
@@ -171,8 +168,8 @@ JavaScript.init = function(workspace) {
  */
 JavaScript.finish = function(code) {
   // Convert the definitions dictionary into a list.
-  const definitions = objectUtils.values(this.definitions_);
-  // Call Blockly.Generator's finish.
+  const definitions = Object.values(this.definitions_);
+  // Call Blockly.CodeGenerator's finish.
   code = Object.getPrototypeOf(this).finish.call(this, code);
   this.isInitialized = false;
 
@@ -321,4 +318,4 @@ JavaScript.getAdjusted = function(
   return at;
 };
 
-exports = JavaScript;
+exports.javascriptGenerator = JavaScript;

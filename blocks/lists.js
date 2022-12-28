@@ -10,25 +10,33 @@
  */
 'use strict';
 
-goog.module('Blockly.blocks.lists');
+goog.module('Blockly.libraryBlocks.lists');
 
 const xmlUtils = goog.require('Blockly.utils.xml');
+const Xml = goog.require('Blockly.Xml');
 const {Align} = goog.require('Blockly.Input');
 /* eslint-disable-next-line no-unused-vars */
 const {Block} = goog.requireType('Blockly.Block');
-const {Blocks} = goog.require('Blockly.blocks');
+// const {BlockDefinition} = goog.requireType('Blockly.blocks');
+// TODO (6248): Properly import the BlockDefinition type.
+/* eslint-disable-next-line no-unused-vars */
+const BlockDefinition = Object;
 const {ConnectionType} = goog.require('Blockly.ConnectionType');
 const {FieldDropdown} = goog.require('Blockly.FieldDropdown');
 const {Msg} = goog.require('Blockly.Msg');
 const {Mutator} = goog.require('Blockly.Mutator');
 /* eslint-disable-next-line no-unused-vars */
 const {Workspace} = goog.requireType('Blockly.Workspace');
-const {defineBlocksWithJsonArray} = goog.require('Blockly.common');
+const {createBlockDefinitionsFromJsonArray, defineBlocks} = goog.require('Blockly.common');
 /** @suppress {extraRequire} */
 goog.require('Blockly.FieldDropdown');
 
 
-defineBlocksWithJsonArray([
+/**
+ * A dictionary of the block definitions provided by this module.
+ * @type {!Object<string, !BlockDefinition>}
+ */
+const blocks = createBlockDefinitionsFromJsonArray([
   // Block for creating an empty list
   // The 'list_create_with' block is preferred as it is more flexible.
   // <block type="lists_create_with">
@@ -112,8 +120,9 @@ defineBlocksWithJsonArray([
     'helpUrl': '%{BKY_LISTS_LENGTH_HELPURL}',
   },
 ]);
+exports.blocks = blocks;
 
-Blocks['lists_create_with'] = {
+blocks['lists_create_with'] = {
   /**
    * Block for creating a list with any number of elements of any type.
    * @this {Block}
@@ -124,7 +133,7 @@ Blocks['lists_create_with'] = {
     this.itemCount_ = 3;
     this.updateShape_();
     this.setOutput(true, 'Array');
-    this.setMutator(new Mutator(['lists_create_with_item']));
+    this.setMutator(new Mutator(['lists_create_with_item'], this));
     this.setTooltip(Msg['LISTS_CREATE_WITH_TOOLTIP']);
   },
   /**
@@ -192,10 +201,13 @@ Blocks['lists_create_with'] = {
     let itemBlock = containerBlock.getInputTargetBlock('STACK');
     // Count number of inputs.
     const connections = [];
-    while (itemBlock && !itemBlock.isInsertionMarker()) {
+    while (itemBlock) {
+      if (itemBlock.isInsertionMarker()) {
+        itemBlock = itemBlock.getNextBlock();
+        continue;
+      }
       connections.push(itemBlock.valueConnection_);
-      itemBlock =
-          itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
+      itemBlock = itemBlock.getNextBlock();
     }
     // Disconnect any children that don't belong.
     for (let i = 0; i < this.itemCount_; i++) {
@@ -220,10 +232,13 @@ Blocks['lists_create_with'] = {
     let itemBlock = containerBlock.getInputTargetBlock('STACK');
     let i = 0;
     while (itemBlock) {
+      if (itemBlock.isInsertionMarker()) {
+        itemBlock = itemBlock.getNextBlock();
+        continue;
+      }
       const input = this.getInput('ADD' + i);
       itemBlock.valueConnection_ = input && input.connection.targetConnection;
-      itemBlock =
-          itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
+      itemBlock = itemBlock.getNextBlock();
       i++;
     }
   },
@@ -255,7 +270,7 @@ Blocks['lists_create_with'] = {
   },
 };
 
-Blocks['lists_create_with_container'] = {
+blocks['lists_create_with_container'] = {
   /**
    * Mutator block for list container.
    * @this {Block}
@@ -270,7 +285,7 @@ Blocks['lists_create_with_container'] = {
   },
 };
 
-Blocks['lists_create_with_item'] = {
+blocks['lists_create_with_item'] = {
   /**
    * Mutator block for adding items.
    * @this {Block}
@@ -285,7 +300,7 @@ Blocks['lists_create_with_item'] = {
   },
 };
 
-Blocks['lists_indexOf'] = {
+blocks['lists_indexOf'] = {
   /**
    * Block for finding an item in the list.
    * @this {Block}
@@ -312,7 +327,7 @@ Blocks['lists_indexOf'] = {
   },
 };
 
-Blocks['lists_getIndex'] = {
+blocks['lists_getIndex'] = {
   /**
    * Block for getting element at index.
    * @this {Block}
@@ -440,10 +455,34 @@ Blocks['lists_getIndex'] = {
     this.updateAt_(isAt);
   },
 
-  // This block does not need JSO serialization hooks (saveExtraState and
-  // loadExtraState) because the state of this object is already encoded in the
-  // dropdown values.
-  // XML hooks are kept for backwards compatibility.
+  /**
+   * Returns the state of this block as a JSON serializable object.
+   * Returns null for efficiency if no state is needed (not a statement)
+   * @return {?{isStatement: boolean}} The state of this block, ie whether it's
+   *     a statement.
+   */
+  saveExtraState: function() {
+    if (!this.outputConnection) {
+      return {
+        'isStatement': true,
+      };
+    }
+    return null;
+  },
+
+  /**
+   * Applies the given state to this block.
+   * @param {*} state The state to apply to this block, ie whether it's a
+   *     statement.
+   */
+  loadExtraState: function(state) {
+    if (state['isStatement']) {
+      this.updateStatement_(true);
+    } else if (typeof state === 'string') {
+      // backward compatible for json serialised mutations
+      this.domToMutation(Xml.textToDom(state));
+    }
+  },
 
   /**
    * Switch between a value block and a statement block.
@@ -492,7 +531,7 @@ Blocks['lists_getIndex'] = {
         /**
          * @param {*} value The input value.
          * @this {FieldDropdown}
-         * @returns {null|undefined} Null if the field has been replaced;
+         * @return {null|undefined} Null if the field has been replaced;
          *     otherwise undefined.
          */
         function(value) {
@@ -516,7 +555,7 @@ Blocks['lists_getIndex'] = {
   },
 };
 
-Blocks['lists_setIndex'] = {
+blocks['lists_setIndex'] = {
   /**
    * Block for setting the element at index.
    * @this {Block}
@@ -612,10 +651,23 @@ Blocks['lists_setIndex'] = {
     this.updateAt_(isAt);
   },
 
-  // This block does not need JSO serialization hooks (saveExtraState and
-  // loadExtraState) because the state of this object is already encoded in the
-  // dropdown values.
-  // XML hooks are kept for backwards compatibility.
+  /**
+   * Returns the state of this block as a JSON serializable object.
+   * This block does not need to serialize any specific state as it is already
+   * encoded in the dropdown values, but must have an implementation to avoid
+   * the backward compatible XML mutations being serialized.
+   * @return {null} The state of this block.
+   */
+  saveExtraState: function() {
+    return null;
+  },
+
+  /**
+   * Applies the given state to this block.
+   * No extra state is needed or expected as it is already encoded in the
+   * dropdown values.
+   */
+  loadExtraState: function() {},
 
   /**
    * Create or delete an input for the numeric index.
@@ -642,7 +694,7 @@ Blocks['lists_setIndex'] = {
         /**
          * @param {*} value The input value.
          * @this {FieldDropdown}
-         * @returns {null|undefined} Null if the field has been replaced;
+         * @return {null|undefined} Null if the field has been replaced;
          *     otherwise undefined.
          */
         function(value) {
@@ -668,7 +720,7 @@ Blocks['lists_setIndex'] = {
   },
 };
 
-Blocks['lists_getSublist'] = {
+blocks['lists_getSublist'] = {
   /**
    * Block for getting sublist.
    * @this {Block}
@@ -724,10 +776,23 @@ Blocks['lists_getSublist'] = {
     this.updateAt_(2, isAt2);
   },
 
-  // This block does not need JSO serialization hooks (saveExtraState and
-  // loadExtraState) because the state of this object is already encoded in the
-  // dropdown values.
-  // XML hooks are kept for backwards compatibility.
+  /**
+   * Returns the state of this block as a JSON serializable object.
+   * This block does not need to serialize any specific state as it is already
+   * encoded in the dropdown values, but must have an implementation to avoid
+   * the backward compatible XML mutations being serialized.
+   * @return {null} The state of this block.
+   */
+  saveExtraState: function() {
+    return null;
+  },
+
+  /**
+   * Applies the given state to this block.
+   * No extra state is needed or expected as it is already encoded in the
+   * dropdown values.
+   */
+  loadExtraState: function() {},
 
   /**
    * Create or delete an input for a numeric index.
@@ -757,7 +822,7 @@ Blocks['lists_getSublist'] = {
         /**
          * @param {*} value The input value.
          * @this {FieldDropdown}
-         * @returns {null|undefined} Null if the field has been replaced;
+         * @return {null|undefined} Null if the field has been replaced;
          *     otherwise undefined.
          */
         function(value) {
@@ -786,30 +851,30 @@ Blocks['lists_getSublist'] = {
   },
 };
 
-Blocks['lists_sort'] = {
+blocks['lists_sort'] = {
   /**
    * Block for sorting a list.
    * @this {Block}
    */
   init: function() {
     this.jsonInit({
-      'message0': Msg['LISTS_SORT_TITLE'],
+      'message0': '%{BKY_LISTS_SORT_TITLE}',
       'args0': [
         {
           'type': 'field_dropdown',
           'name': 'TYPE',
           'options': [
-            [Msg['LISTS_SORT_TYPE_NUMERIC'], 'NUMERIC'],
-            [Msg['LISTS_SORT_TYPE_TEXT'], 'TEXT'],
-            [Msg['LISTS_SORT_TYPE_IGNORECASE'], 'IGNORE_CASE'],
+            ['%{BKY_LISTS_SORT_TYPE_NUMERIC}', 'NUMERIC'],
+            ['%{BKY_LISTS_SORT_TYPE_TEXT}', 'TEXT'],
+            ['%{BKY_LISTS_SORT_TYPE_IGNORECASE}', 'IGNORE_CASE'],
           ],
         },
         {
           'type': 'field_dropdown',
           'name': 'DIRECTION',
           'options': [
-            [Msg['LISTS_SORT_ORDER_ASCENDING'], '1'],
-            [Msg['LISTS_SORT_ORDER_DESCENDING'], '-1'],
+            ['%{BKY_LISTS_SORT_ORDER_ASCENDING}', '1'],
+            ['%{BKY_LISTS_SORT_ORDER_DESCENDING}', '-1'],
           ],
         },
         {
@@ -820,13 +885,13 @@ Blocks['lists_sort'] = {
       ],
       'output': 'Array',
       'style': 'list_blocks',
-      'tooltip': Msg['LISTS_SORT_TOOLTIP'],
-      'helpUrl': Msg['LISTS_SORT_HELPURL'],
+      'tooltip': '%{BKY_LISTS_SORT_TOOLTIP}',
+      'helpUrl': '%{BKY_LISTS_SORT_HELPURL}',
     });
   },
 };
 
-Blocks['lists_split'] = {
+blocks['lists_split'] = {
   /**
    * Block for splitting text into a list, or joining a list into text.
    * @this {Block}
@@ -908,8 +973,24 @@ Blocks['lists_split'] = {
     this.updateType_(xmlElement.getAttribute('mode'));
   },
 
-  // This block does not need JSO serialization hooks (saveExtraState and
-  // loadExtraState) because the state of this object is already encoded in the
-  // dropdown values.
-  // XML hooks are kept for backwards compatibility.
+  /**
+   * Returns the state of this block as a JSON serializable object.
+   * This block does not need to serialize any specific state as it is already
+   * encoded in the dropdown values, but must have an implementation to avoid
+   * the backward compatible XML mutations being serialized.
+   * @return {null} The state of this block.
+   */
+  saveExtraState: function() {
+    return null;
+  },
+
+  /**
+   * Applies the given state to this block.
+   * No extra state is needed or expected as it is already encoded in the
+   * dropdown values.
+   */
+  loadExtraState: function() {},
 };
+
+// Register provided blocks.
+defineBlocks(blocks);

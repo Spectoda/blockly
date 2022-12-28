@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.fieldTextInput');
+goog.declareModuleId('Blockly.test.fieldTextInput');
 
-const {createTestBlock, defineRowBlock, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {assertFieldValue, runConstructorSuiteTests, runFromJsonSuiteTests, runSetValueTests} from './test_helpers/fields.js';
+import {createTestBlock, defineRowBlock} from './test_helpers/block_definitions.js';
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Text Input Fields', function() {
@@ -53,7 +56,7 @@ suite('Text Input Fields', function() {
    * @param {!Blockly.FieldTextInput} field The field to check.
    */
   const assertFieldDefault = function(field) {
-    testHelpers.assertFieldValue(field, defaultFieldValue);
+    assertFieldValue(field, defaultFieldValue);
   };
   /**
    * Asserts that the field properties are correct based on the test case.
@@ -61,14 +64,14 @@ suite('Text Input Fields', function() {
    * @param {!FieldValueTestCase} testCase The test case.
    */
   const validTestCaseAssertField = function(field, testCase) {
-    testHelpers.assertFieldValue(field, testCase.expectedValue);
+    assertFieldValue(field, testCase.expectedValue);
   };
 
-  testHelpers.runConstructorSuiteTests(
+  runConstructorSuiteTests(
       Blockly.FieldTextInput, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
-  testHelpers.runFromJsonSuiteTests(
+  runFromJsonSuiteTests(
       Blockly.FieldTextInput, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
@@ -77,12 +80,12 @@ suite('Text Input Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldTextInput();
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, defaultFieldValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue('value');
-        testHelpers.assertFieldValue(this.field, 'value');
+        assertFieldValue(this.field, 'value');
       });
     });
     suite('Value -> New Value', function() {
@@ -90,12 +93,12 @@ suite('Text Input Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldTextInput(initialValue);
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, initialValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue('value');
-        testHelpers.assertFieldValue(this.field, 'value');
+        assertFieldValue(this.field, 'value');
       });
     });
   });
@@ -103,9 +106,9 @@ suite('Text Input Fields', function() {
   suite('Validators', function() {
     setup(function() {
       this.field = new Blockly.FieldTextInput('value');
-      this.field.htmlInput_ = Object.create(null);
-      this.field.htmlInput_.oldValue_ = 'value';
-      this.field.htmlInput_.untypedDefaultValue_ = 'value';
+      this.field.htmlInput_ = document.createElement('input');
+      this.field.htmlInput_.setAttribute('data-old-value', 'value');
+      this.field.htmlInput_.setAttribute('data-untyped-default-value', 'value');
       this.stub = sinon.stub(this.field, 'resizeEditor_');
     });
     teardown(function() {
@@ -136,12 +139,12 @@ suite('Text Input Fields', function() {
           this.field.isBeingEdited_ = true;
           this.field.htmlInput_.value = suiteInfo.value;
           this.field.onHtmlInputChange_(null);
-          testHelpers.assertFieldValue(
+          assertFieldValue(
               this.field, suiteInfo.expectedValue, suiteInfo.value);
         });
         test('When Not Editing', function() {
           this.field.setValue(suiteInfo.value);
-          testHelpers.assertFieldValue(this.field, suiteInfo.expectedValue);
+          assertFieldValue(this.field, suiteInfo.expectedValue);
         });
       });
     });
@@ -170,6 +173,7 @@ suite('Text Input Fields', function() {
               };
             },
             markFocused: function() {},
+            options: {},
           };
           field.sourceBlock_ = {
             workspace: workspace,

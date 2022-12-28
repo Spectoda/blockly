@@ -1,16 +1,13 @@
 *_compressed*.js
-blockly_uncompressed.js
-gulpfile.js
 /msg/*
 /build/*
 /dist/*
-/core/utils/global.js
 /tests/blocks/*
 /tests/themes/*
 /tests/compile/*
 /tests/jsunit/*
 /tests/generators/*
-/tests/mocha/run_mocha_tests_in_browser.js
+/tests/mocha/webdriver.js
 /tests/screenshot/*
 /tests/test_runner.js
 /tests/workspace_svg/*
@@ -20,3 +17,4 @@ gulpfile.js
 /externs/*
 /closure/*
 /scripts/gulpfiles/*
+/typings/*

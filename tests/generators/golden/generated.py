@@ -223,22 +223,22 @@ def test_count_by():
     loglist.append(x)
   assertEquals(loglist, [1, 2.5, 4, 5.5, 7], 'count with floats')
   loglist = []
-  x_start = float(1 + 0)
-  x_end = float(8 + 0)
-  x_inc = float(1 - 2)
+  x_start = 1 + 0
+  x_end = 8 + 0
+  x_inc = 1 - 2
   for x in (x_start <= x_end) and upRange(x_start, x_end, x_inc) or downRange(x_start, x_end, x_inc):
     loglist.append(x)
   assertEquals(loglist, [1, 2, 3, 4, 5, 6, 7, 8], 'count up non-trivial ints')
   loglist = []
-  x_start2 = float(8 + 0)
-  x_end2 = float(1 + 0)
+  x_start2 = 8 + 0
+  x_end2 = 1 + 0
   for x in (x_start2 <= x_end2) and upRange(x_start2, x_end2, 2) or downRange(x_start2, x_end2, 2):
     loglist.append(x)
   assertEquals(loglist, [8, 6, 4, 2], 'count down non-trivial ints')
   loglist = []
-  x_start3 = float(5 + 0.5)
-  x_end3 = float(1 + 0)
-  x_inc2 = float(1 + 0)
+  x_start3 = 5 + 0.5
+  x_end3 = 1 + 0
+  x_inc2 = 1 + 0
   for x in (x_start3 <= x_end3) and upRange(x_start3, x_end3, x_inc2) or downRange(x_start3, x_end3, x_inc2):
     loglist.append(x)
   assertEquals(loglist, [5.5, 4.5, 3.5, 2.5, 1.5], 'count with floats')
@@ -255,14 +255,14 @@ def test_count_loops():
     log = str(log) + str(x)
   assertEquals(log, '87654321', 'count down')
   loglist = []
-  x_start4 = float(1 + 0)
-  x_end4 = float(4 + 0)
+  x_start4 = 1 + 0
+  x_end4 = 4 + 0
   for x in (x_start4 <= x_end4) and upRange(x_start4, x_end4, 1) or downRange(x_start4, x_end4, 1):
     loglist.append(x)
   assertEquals(loglist, [1, 2, 3, 4], 'count up non-trivial')
   loglist = []
-  x_start5 = float(3 + 1)
-  x_end5 = float(1 + 0)
+  x_start5 = 3 + 1
+  x_end5 = 1 + 0
   for x in (x_start5 <= x_end5) and upRange(x_start5, x_end5, 1) or downRange(x_start5, x_end5, 1):
     loglist.append(x)
   assertEquals(loglist, [4, 3, 2, 1], 'count down non-trivial')
@@ -398,12 +398,16 @@ def test_number_properties():
   assertEquals(42 % 2 == 0, True, 'even')
   assertEquals(42.1 % 2 == 1, False, 'odd')
   assertEquals(math_isPrime(5), True, 'prime 5')
+  assertEquals(math_isPrime(5 + 2), True, 'prime 5 + 2 (extra parentheses)')
   assertEquals(math_isPrime(25), False, 'prime 25')
   assertEquals(math_isPrime(-31.1), False, 'prime negative')
   assertEquals(math.pi % 1 == 0, False, 'whole')
   assertEquals(float('inf') > 0, True, 'positive')
+  assertEquals(5 + 2 > 0, True, '5 + 2 is positive (extra parentheses)')
   assertEquals(-42 < 0, True, 'negative')
+  assertEquals(3 + 2 < 0, False, '3 + 2 is negative (extra parentheses)')
   assertEquals(42 % 2 == 0, True, 'divisible')
+  assertEquals(not False, True, 'divisible by 0')
 
 # Tests the "round" block.
 def test_round():
@@ -595,7 +599,7 @@ def test_find_text_complex():
 
 def text_random_letter(text):
   x = int(random.random() * len(text))
-  return text[x];
+  return text[x]
 
 # Tests the "get letter" block with a variable.
 def test_get_text_simple():

@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.theme');
+goog.declareModuleId('Blockly.test.theme');
 
-const {assertEventFired, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import {assertEventFired} from './test_helpers/events.js';
+import * as eventUtils from '../../build/src/core/events/utils.js';
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Theme', function() {
@@ -129,10 +131,6 @@ suite('Theme', function() {
           sinon.stub(workspace, 'refreshToolboxSelection');
       blockA.styleName_ = 'styleOne';
 
-      // Stubs are cleaned up in sharedTestTeardown
-      sinon.stub(Blockly, "getMainWorkspace").returns(workspace);
-      sinon.stub(Blockly, "hideChaff");
-
       workspace.setTheme(theme);
 
       // Checks that the theme was set correctly on Blockly namespace
@@ -146,7 +144,7 @@ suite('Theme', function() {
 
       assertEventFired(
           this.eventsFireStub, Blockly.Events.ThemeChange,
-          {themeName: 'themeName'}, workspace.id);
+          {themeName: 'themeName', type: eventUtils.THEME_CHANGE}, workspace.id);
     } finally {
       workspaceTeardown.call(this, workspace);
     }
@@ -270,6 +268,13 @@ suite('Theme', function() {
       };
       stringifyAndCompare(
           this.constants.validatedBlockStyle_(inputStyle), expectedOutput);
+    });
+  });
+
+  suite('defineTheme', function() {
+    test('Normalizes to lowercase', function() {
+      const theme = Blockly.Theme.defineTheme('TEST', {});
+      chai.assert.equal(theme.name, 'test');
     });
   });
 });

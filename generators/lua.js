@@ -12,12 +12,10 @@
 'use strict';
 
 goog.module('Blockly.Lua');
-goog.module.declareLegacyNamespace();
 
-const objectUtils = goog.require('Blockly.utils.object');
 const stringUtils = goog.require('Blockly.utils.string');
 const {Block} = goog.requireType('Blockly.Block');
-const {Generator} = goog.require('Blockly.Generator');
+const {CodeGenerator} = goog.require('Blockly.CodeGenerator');
 const {inputTypes} = goog.require('Blockly.inputTypes');
 const {Names} = goog.require('Blockly.Names');
 const {Workspace} = goog.requireType('Blockly.Workspace');
@@ -25,9 +23,9 @@ const {Workspace} = goog.requireType('Blockly.Workspace');
 
 /**
  * Lua code generator.
- * @type {!Generator}
+ * @type {!CodeGenerator}
  */
-const Lua = new Generator('Lua');
+const Lua = new CodeGenerator('Lua');
 
 /**
  * List of illegal variable names.
@@ -94,7 +92,7 @@ Lua.isInitialized = false;
  * @param {!Workspace} workspace Workspace to generate code from.
  */
 Lua.init = function(workspace) {
-  // Call Blockly.Generator's init.
+  // Call Blockly.CodeGenerator's init.
   Object.getPrototypeOf(this).init.call(this);
 
   if (!this.nameDB_) {
@@ -116,8 +114,8 @@ Lua.init = function(workspace) {
  */
 Lua.finish = function(code) {
   // Convert the definitions dictionary into a list.
-  const definitions = objectUtils.values(this.definitions_);
-  // Call Blockly.Generator's finish.
+  const definitions = Object.values(this.definitions_);
+  // Call Blockly.CodeGenerator's finish.
   code = Object.getPrototypeOf(this).finish.call(this, code);
   this.isInitialized = false;
 
@@ -204,4 +202,4 @@ Lua.scrub_ = function(block, code, opt_thisOnly) {
   return commentCode + code + nextCode;
 };
 
-exports = Lua;
+exports.luaGenerator = Lua;

@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.fieldVariable');
+goog.declareModuleId('Blockly.test.fieldVariable');
 
-const {createGenUidStubWithReturns, createTestBlock, defineRowBlock, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {assertFieldValue, runConstructorSuiteTests, runFromJsonSuiteTests, runSetValueTests} from './test_helpers/fields.js';
+import {createGenUidStubWithReturns, sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
+import {createTestBlock, defineRowBlock} from './test_helpers/block_definitions.js';
 
 
 suite('Variable Fields', function() {
@@ -16,7 +19,7 @@ suite('Variable Fields', function() {
     sharedTestSetup.call(this);
     this.workspace = new Blockly.Workspace();
     // Stub for default variable name.
-    sinon.stub(Blockly.Variables, 'generateUniqueName').returns(
+    sinon.stub(Blockly.Variables.TEST_ONLY, 'generateUniqueNameInternal').returns(
       FAKE_VARIABLE_NAME);
   });
   teardown(function() {
@@ -83,7 +86,7 @@ suite('Variable Fields', function() {
    * @param {!Blockly.FieldVariable} field The field to check.
    */
   const assertFieldDefault = function(field) {
-    testHelpers.assertFieldValue(field, FAKE_ID, defaultFieldName);
+    assertFieldValue(field, FAKE_ID, defaultFieldName);
   };
   /**
    * Asserts that the field properties are correct based on the test case.
@@ -91,15 +94,15 @@ suite('Variable Fields', function() {
    * @param {!FieldValueTestCase} testCase The test case.
    */
   const validTestCaseAssertField = function(field, testCase) {
-    testHelpers.assertFieldValue(field, FAKE_ID, testCase.expectedText);
+    assertFieldValue(field, FAKE_ID, testCase.expectedText);
   };
 
-  testHelpers.runConstructorSuiteTests(
+  runConstructorSuiteTests(
       Blockly.FieldVariable, validValueCreationTestCases,
       invalidValueCreationTestCases,
       validTestCaseAssertField, assertFieldDefault, customCreateWithJs);
 
-  testHelpers.runFromJsonSuiteTests(
+  runFromJsonSuiteTests(
       Blockly.FieldVariable, validValueCreationTestCases,
       invalidValueCreationTestCases,
       validTestCaseAssertField, assertFieldDefault, customCreateWithJson);
@@ -149,7 +152,7 @@ suite('Variable Fields', function() {
     teardown(function() {
       console.warn = this.nativeConsoleWarn;
     });
-    testHelpers.runSetValueTests(validValueTestCases, invalidValueTestCases,
+    runSetValueTests(validValueTestCases, invalidValueTestCases,
         FAKE_ID, defaultFieldName);
   });
 
@@ -215,7 +218,7 @@ suite('Variable Fields', function() {
       });
       test('New Value', function() {
         this.variableField.setValue('id2');
-        testHelpers.assertFieldValue(this.variableField, 'id1', 'name1');
+        assertFieldValue(this.variableField, 'id1', 'name1');
       });
     });
     suite('Force \'id\' ID Validator', function() {
@@ -228,7 +231,7 @@ suite('Variable Fields', function() {
         // Must create the var so that the field doesn't throw an error.
         this.workspace.createVariable('thing2', null, 'other2');
         this.variableField.setValue('other2');
-        testHelpers.assertFieldValue(this.variableField, 'id2', 'name2');
+        assertFieldValue(this.variableField, 'id2', 'name2');
       });
     });
     suite('Returns Undefined Validator', function() {
@@ -237,7 +240,7 @@ suite('Variable Fields', function() {
       });
       test('New Value', function() {
         this.variableField.setValue('id2');
-        testHelpers.assertFieldValue(this.variableField, 'id2', 'name2');
+        assertFieldValue(this.variableField, 'id2', 'name2');
       });
     });
   });
@@ -403,7 +406,7 @@ suite('Variable Fields', function() {
         chai.assert.deepEqual(
             jso['fields'], {'VAR': {'id': 'id2', 'name': 'x', 'type': ''}});
       });
-  
+
       test('Typed', function() {
         const block = this.workspace.newBlock('row_block');
         const field =
@@ -426,7 +429,7 @@ suite('Variable Fields', function() {
         chai.assert.isUndefined(jso['fields']['VAR']['name']);
         chai.assert.isUndefined(jso['fields']['VAR']['type']);
       });
-  
+
       test('Typed', function() {
         const block = this.workspace.newBlock('row_block');
         const field =

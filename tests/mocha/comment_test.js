@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.comments');
+goog.declareModuleId('Blockly.test.comments');
 
-const {assertEventFired, sharedTestSetup, sharedTestTeardown} = goog.require('Blockly.test.helpers');
+import {assertEventFired} from './test_helpers/events.js';
+import * as eventUtils from '../../build/src/core/events/utils.js';
+import {sharedTestSetup, sharedTestTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Comments', function() {
@@ -54,7 +56,7 @@ suite('Comments', function() {
       assertEditable(this.comment);
       assertEventFired(
           this.eventsFireStub, Blockly.Events.BubbleOpen,
-          {bubbleType: 'comment', isOpen: true}, this.workspace.id,
+          {bubbleType: 'comment', isOpen: true, type: eventUtils.BUBBLE_OPEN}, this.workspace.id,
           this.block.id);
     });
     test('Not Editable', function() {
@@ -66,8 +68,8 @@ suite('Comments', function() {
       assertNotEditable(this.comment);
       assertEventFired(
           this.eventsFireStub, Blockly.Events.BubbleOpen,
-          {bubbleType: 'comment', isOpen: true}, this.workspace.id,
-          this.block.id);
+          {bubbleType: 'comment', isOpen: true, type: eventUtils.BUBBLE_OPEN},
+          this.workspace.id, this.block.id);
     });
     test('Editable -> Not Editable', function() {
       this.comment.setVisible(true);
@@ -79,8 +81,8 @@ suite('Comments', function() {
       assertNotEditable(this.comment);
       assertEventFired(
           this.eventsFireStub, Blockly.Events.BubbleOpen,
-          {bubbleType: 'comment', isOpen: true}, this.workspace.id,
-          this.block.id);
+          {bubbleType: 'comment', isOpen: true, type: eventUtils.BUBBLE_OPEN},
+          this.workspace.id, this.block.id);
     });
     test('Not Editable -> Editable', function() {
       const editableStub = sinon.stub(this.block, 'isEditable').returns(false);
@@ -94,8 +96,8 @@ suite('Comments', function() {
       assertEditable(this.comment);
       assertEventFired(
           this.eventsFireStub, Blockly.Events.BubbleOpen,
-          {bubbleType: 'comment', isOpen: true}, this.workspace.id,
-          this.block.id);
+          {bubbleType: 'comment', isOpen: true, type: eventUtils.BUBBLE_OPEN},
+          this.workspace.id, this.block.id);
     });
   });
   suite('Set/Get Bubble Size', function() {

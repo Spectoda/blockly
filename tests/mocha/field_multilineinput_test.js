@@ -4,9 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.fieldMultiline');
+goog.declareModuleId('Blockly.test.fieldMultiline');
 
-const {createTestBlock, defineRowBlock, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {assertFieldValue, runConstructorSuiteTests, runFromJsonSuiteTests, runSetValueTests} from './test_helpers/fields.js';
+import {createTestBlock, defineRowBlock} from './test_helpers/block_definitions.js';
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
+import {runCodeGenerationTestSuites} from './test_helpers/code_generation.js';
+const {dartGenerator} = goog.require('Blockly.Dart');
+const {javascriptGenerator} = goog.require('Blockly.JavaScript');
+const {luaGenerator} = goog.require('Blockly.Lua');
+const {phpGenerator} = goog.require('Blockly.PHP');
+const {pythonGenerator} = goog.require('Blockly.Python');
 
 
 suite('Multiline Input Fields', function() {
@@ -55,7 +64,7 @@ suite('Multiline Input Fields', function() {
    * @param {!Blockly.FieldMultilineInput} field The field to check.
    */
   const assertFieldDefault = function(field) {
-    testHelpers.assertFieldValue(field, defaultFieldValue);
+    assertFieldValue(field, defaultFieldValue);
   };
   /**
    * Asserts that the field properties are correct based on the test case.
@@ -63,14 +72,14 @@ suite('Multiline Input Fields', function() {
    * @param {!FieldValueTestCase} testCase The test case.
    */
   const validTestCaseAssertField = function(field, testCase) {
-    testHelpers.assertFieldValue(field, testCase.expectedValue);
+    assertFieldValue(field, testCase.expectedValue);
   };
 
-  testHelpers.runConstructorSuiteTests(
+  runConstructorSuiteTests(
       Blockly.FieldMultilineInput, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
-  testHelpers.runFromJsonSuiteTests(
+  runFromJsonSuiteTests(
       Blockly.FieldMultilineInput, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
@@ -79,12 +88,12 @@ suite('Multiline Input Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldMultilineInput();
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, defaultFieldValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue('value');
-        testHelpers.assertFieldValue(this.field, 'value');
+        assertFieldValue(this.field, 'value');
       });
     });
     suite('Value -> New Value', function() {
@@ -92,12 +101,12 @@ suite('Multiline Input Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldMultilineInput(initialValue);
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, initialValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue('value');
-        testHelpers.assertFieldValue(this.field, 'value');
+        assertFieldValue(this.field, 'value');
       });
     });
   });
@@ -120,35 +129,35 @@ suite('Multiline Input Fields', function() {
      * @type {Array<CodeGenerationTestSuite>}
      */
     const testSuites = [
-      {title: 'Dart', generator: Blockly.Dart,
+      {title: 'Dart', generator: dartGenerator,
         testCases: [
           {title: 'Empty string', expectedCode: '\'\'',
             createBlock: createBlockFn('')},
           {title: 'String with newline', expectedCode: '\'bark bark\' + \'\\n\' + \n\' bark bark bark\' + \'\\n\' + \n\' bark bar bark bark\' + \'\\n\' + \n\'\'',
             createBlock: createBlockFn('bark bark\n bark bark bark\n bark bar bark bark\n')},
         ]},
-      {title: 'JavaScript', generator: Blockly.JavaScript,
+      {title: 'JavaScript', generator: javascriptGenerator,
         testCases: [
           {title: 'Empty string', expectedCode: '\'\'',
             createBlock: createBlockFn('')},
           {title: 'String with newline', expectedCode: '\'bark bark\' + \'\\n\' +\n\' bark bark bark\' + \'\\n\' +\n\' bark bar bark bark\' + \'\\n\' +\n\'\'',
             createBlock: createBlockFn('bark bark\n bark bark bark\n bark bar bark bark\n')},
         ]},
-      {title: 'Lua', generator: Blockly.Lua,
+      {title: 'Lua', generator: luaGenerator,
         testCases: [
           {title: 'Empty string', expectedCode: '\'\'',
             createBlock: createBlockFn('')},
           {title: 'String with newline', expectedCode: '\'bark bark\' .. \'\\n\' ..\n\' bark bark bark\' .. \'\\n\' ..\n\' bark bar bark bark\' .. \'\\n\' ..\n\'\'',
             createBlock: createBlockFn('bark bark\n bark bark bark\n bark bar bark bark\n')},
         ]},
-      {title: 'PHP', generator: Blockly.PHP,
+      {title: 'PHP', generator: phpGenerator,
         testCases: [
           {title: 'Empty string', expectedCode: '\'\'',
             createBlock: createBlockFn('')},
           {title: 'String with newline', expectedCode: '\'bark bark\' . "\\n" .\n\' bark bark bark\' . "\\n" .\n\' bark bar bark bark\' . "\\n" .\n\'\'',
             createBlock: createBlockFn('bark bark\n bark bark bark\n bark bar bark bark\n')},
         ]},
-      {title: 'Python', generator: Blockly.Python,
+      {title: 'Python', generator: pythonGenerator,
         testCases: [
           {title: 'Empty string', expectedCode: '\'\'',
             createBlock: createBlockFn('')},
@@ -156,14 +165,14 @@ suite('Multiline Input Fields', function() {
             createBlock: createBlockFn('bark bark\n bark bark bark\n bark bar bark bark\n')},
         ]},
     ];
-    testHelpers.runCodeGenerationTestSuites(testSuites);
+    runCodeGenerationTestSuites(testSuites);
   });
 
   suite('Serialization', function() {
     setup(function() {
       this.workspace = new Blockly.Workspace();
       defineRowBlock();
-      
+
       this.assertValue = (value) => {
         const block = this.workspace.newBlock('row_block');
         const field = new Blockly.FieldMultilineInput(value);

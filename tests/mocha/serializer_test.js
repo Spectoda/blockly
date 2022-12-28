@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.serialization');
+goog.declareModuleId('Blockly.test.serialization');
 
-const {sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {TestCase, TestSuite, runTestCases, runTestSuites} from './test_helpers/common.js';
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
 
 
 // TODO: Move this into samples as part of the dev-tools package.
@@ -23,7 +25,7 @@ function SerializerTestCase(title, xml) {
   this.title = title;
   this.xml = xml;
 }
-SerializerTestCase.prototype = new testHelpers.TestCase();
+SerializerTestCase.prototype = new TestCase();
 
 /**
  * The XML we want to ensure round-trips through the serializer.
@@ -39,7 +41,7 @@ SerializerTestCase.prototype.xml = '';
 function SerializerTestSuite(title) {
   this.title = title;
 }
-SerializerTestSuite.prototype = new testHelpers.TestSuite();
+SerializerTestSuite.prototype = new TestSuite();
 
 const Serializer = new SerializerTestSuite('Serializer');
 
@@ -1672,12 +1674,52 @@ Serializer.Mutations.Procedure.Caller = new SerializerTestCase(
     '</mutation>' +
     '</block>' +
     '</xml>');
+Serializer.Mutations.Procedure.CollapsedProceduresCallreturn = new SerializerTestCase(
+    'CollapsedProceduresCallreturn',
+    '<xml xmlns="https://developers.google.com/blockly/xml">' +
+    '<variables>' +
+    '<variable id="aaaaaaaaaaaaaaaaaaaa">x</variable>' +
+    '</variables>' +
+    '<block type="procedures_defreturn" id="id******************" x="42" y="42">' +
+    '<mutation>' +
+    '<arg name="x" varid="aaaaaaaaaaaaaaaaaaaa"></arg>' +
+    '</mutation>' +
+    '<field name="NAME">do something</field>' +
+    '<comment pinned="false" h="80" w="160">Describe this function...</comment>' +
+    '</block>' +
+    '<block type="procedures_callreturn" id="id1*****************" collapsed="true" x="52" y="52">' +
+    '<mutation name="do something">' +
+    '<arg name="x"></arg>' +
+    '</mutation>' +
+    '</block>' +
+    '</xml>');
+Serializer.Mutations.Procedure.CollapsedProceduresCallnoreturn = new SerializerTestCase(
+    'CollapsedProceduresCallnoreturn',
+    '<xml xmlns="https://developers.google.com/blockly/xml">' +
+    '<variables>' +
+    '<variable id="aaaaaaaaaaaaaaaaaaaa">x</variable>' +
+    '</variables>' +
+    '<block type="procedures_defnoreturn" id="id******************" x="42" y="42">' +
+    '<mutation>' +
+    '<arg name="x" varid="aaaaaaaaaaaaaaaaaaaa"></arg>' +
+    '</mutation>' +
+    '<field name="NAME">do something</field>' +
+    '<comment pinned="false" h="80" w="160">Describe this function...</comment>' +
+    '</block>' +
+    '<block type="procedures_callnoreturn" id="id1*****************" collapsed="true" x="52" y="52">' +
+    '<mutation name="do something">' +
+    '<arg name="x"></arg>' +
+    '</mutation>' +
+    '</block>' +
+    '</xml>');
 Serializer.Mutations.Procedure.testCases = [
   Serializer.Mutations.Procedure.NoMutation,
   Serializer.Mutations.Procedure.Variables,
   Serializer.Mutations.Procedure.NoStatements,
   Serializer.Mutations.Procedure.IfReturn,
   Serializer.Mutations.Procedure.Caller,
+  Serializer.Mutations.Procedure.CollapsedProceduresCallreturn,
+  Serializer.Mutations.Procedure.CollapsedProceduresCallnoreturn,
 ];
 
 Serializer.Mutations.Procedure.Names = new SerializerTestSuite('Names');
@@ -1818,9 +1860,9 @@ const runSerializerTestSuite = (serializer, deserializer, testSuite) => {
       sharedTestTeardown.call(this);
     });
 
-    testHelpers.runTestSuites(
+    runTestSuites(
         testSuite.testSuites, createTestCaseFunction);
-    testHelpers.runTestCases(testSuite.testCases, createTestFunction);
+    runTestCases(testSuite.testCases, createTestFunction);
   });
 };
 

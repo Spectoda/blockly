@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.fieldLabel');
+goog.declareModuleId('Blockly.test.fieldLabel');
 
-const {createTestBlock, sharedTestSetup, sharedTestTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {assertFieldValue, runConstructorSuiteTests, runFromJsonSuiteTests, runSetValueTests} from './test_helpers/fields.js';
+import {sharedTestSetup, sharedTestTeardown} from './test_helpers/setup_teardown.js';
+import {createTestBlock} from './test_helpers/block_definitions.js';
 
 
 suite('Label Fields', function() {
@@ -53,7 +56,7 @@ suite('Label Fields', function() {
    * @param {!Blockly.FieldLabel} field The field to check.
    */
   const assertFieldDefault = function(field) {
-    testHelpers.assertFieldValue(field, defaultFieldValue);
+    assertFieldValue(field, defaultFieldValue);
   };
   /**
    * Asserts that the field properties are correct based on the test case.
@@ -61,14 +64,14 @@ suite('Label Fields', function() {
    * @param {!FieldValueTestCase} testCase The test case.
    */
   const validTestCaseAssertField = function(field, testCase) {
-    testHelpers.assertFieldValue(field, testCase.expectedValue);
+    assertFieldValue(field, testCase.expectedValue);
   };
 
-  testHelpers.runConstructorSuiteTests(
+  runConstructorSuiteTests(
       Blockly.FieldLabel, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
-  testHelpers.runFromJsonSuiteTests(
+  runFromJsonSuiteTests(
       Blockly.FieldLabel, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
@@ -77,12 +80,12 @@ suite('Label Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldLabel();
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, defaultFieldValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue('value');
-        testHelpers.assertFieldValue(this.field, 'value');
+        assertFieldValue(this.field, 'value');
       });
     });
     suite('Value -> New Value', function() {
@@ -90,12 +93,12 @@ suite('Label Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldLabel(initialValue);
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, initialValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue('value');
-        testHelpers.assertFieldValue(this.field, 'value');
+        assertFieldValue(this.field, 'value');
       });
     });
   });

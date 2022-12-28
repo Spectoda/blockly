@@ -1,6 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bada Kaji",
+			"बडा काजी",
 			"सरोज कुमार ढकाल"
 		]
 	},
@@ -35,9 +37,6 @@
 	"COLOUR_BLEND_COLOUR1": " रङ्ग १",
 	"COLOUR_BLEND_COLOUR2": "रङ्ग २",
 	"COLOUR_BLEND_RATIO": "अनुपात",
-	"IOS_OK": "हुन्छ",
-	"IOS_CANCEL": "रद्द गर्ने",
-	"IOS_ERROR": "त्रुटि",
 	"MATH_IS_EVEN": "जोर संख्या हो",
 	"MATH_IS_ODD": "बिजोर संख्या हो",
 	"MATH_IS_PRIME": "रुढ संख्या हो",
@@ -45,5 +44,5 @@
 	"MATH_IS_NEGATIVE": "ऋणात्मक संख्या हो",
 	"PROCEDURES_MUTATORCONTAINER_TITLE": "इन्पुटहरू",
 	"DIALOG_OK": "हुन्छ",
-	"DIALOG_CANCEL": "रद्द गर्ने"
+	"DIALOG_CANCEL": "रद्द गर्नुहोस्"
 }

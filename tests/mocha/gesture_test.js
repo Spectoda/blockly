@@ -4,9 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.gesture');
+goog.declareModuleId('Blockly.test.gesture');
 
-const {assertEventFired, assertEventNotFired, defineBasicBlockWithField, dispatchPointerEvent, sharedTestSetup, sharedTestTeardown} = goog.require('Blockly.test.helpers');
+import {assertEventFired, assertEventNotFired} from './test_helpers/events.js';
+import {defineBasicBlockWithField} from './test_helpers/block_definitions.js';
+import {dispatchPointerEvent} from './test_helpers/user_input.js';
+import * as eventUtils from '../../build/src/core/events/utils.js';
+import {sharedTestSetup, sharedTestTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Gesture', function() {
@@ -34,12 +38,12 @@ suite('Gesture', function() {
 
 
     assertEventFired(eventsFireStub, Blockly.Events.Selected,
-        {oldElementId: null, newElementId: block.id}, fieldWorkspace.id);
-    assertEventNotFired(eventsFireStub, Blockly.Events.Click, {});
+        {newElementId: block.id, type: eventUtils.SELECTED}, fieldWorkspace.id);
+    assertEventNotFired(eventsFireStub, Blockly.Events.Click, {type: eventUtils.CLICK});
   }
 
   function getTopFlyoutBlock(flyout) {
-    return flyout.workspace_.topBlocks_[0];
+    return flyout.workspace_.getTopBlocks(false)[0];
   }
 
   setup(function() {
@@ -57,7 +61,7 @@ suite('Gesture', function() {
     const e = {id: 'dummy_test_event'};
     const gesture = new Blockly.Gesture(e, this.workspace);
     chai.assert.equal(gesture.mostRecentEvent_, e);
-    chai.assert.equal(gesture.creatorWorkspace_, this.workspace);
+    chai.assert.equal(gesture.creatorWorkspace, this.workspace);
   });
 
   test('Field click - Click in workspace', function() {
@@ -69,8 +73,8 @@ suite('Gesture', function() {
   });
 
   test('Field click - Auto close flyout', function() {
-    const flyout = this.workspace.flyout_;
-    chai.assert.exists(this.workspace.flyout_,
+    const flyout = this.workspace.getFlyout(true);
+    chai.assert.exists(flyout,
         'Precondition: missing flyout');
     flyout.autoClose = true;
 
@@ -79,8 +83,8 @@ suite('Gesture', function() {
   });
 
   test('Field click - Always open flyout', function() {
-    const flyout = this.workspace.flyout_;
-    chai.assert.exists(this.workspace.flyout_,
+    const flyout = this.workspace.getFlyout(true);
+    chai.assert.exists(flyout,
         'Precondition: missing flyout');
     flyout.autoClose = false;
 

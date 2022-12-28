@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.widgetDiv');
+goog.declareModuleId('Blockly.test.widgetDiv');
 
-const {sharedTestSetup, sharedTestTeardown} = goog.require('Blockly.test.helpers');
+import {sharedTestSetup, sharedTestTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('WidgetDiv', function() {
@@ -64,7 +64,7 @@ suite('WidgetDiv', function() {
         this.testWidgetPosition(
             anchorBBox, false, expectedX, expectedY, this.widgetSize.height);
       });
-  
+
       test('topConflict', function() {
         // Anchor close to the top.
         const anchorBBox =
@@ -75,7 +75,7 @@ suite('WidgetDiv', function() {
         this.testWidgetPosition(
             anchorBBox, false, expectedX, expectedY, this.widgetSize.height);
       });
-  
+
       test('bottomConflict', function() {
         // Anchor placed close to the bottom.
         const anchorBBox =
@@ -86,7 +86,7 @@ suite('WidgetDiv', function() {
         this.testWidgetPosition(
             anchorBBox, false, expectedX, expectedY, this.widgetSize.height);
       });
-  
+
       test('leftConflict', function() {
         // Anchor placed close to the left side.
         const anchorBBox =
@@ -97,7 +97,7 @@ suite('WidgetDiv', function() {
         this.testWidgetPosition(
             anchorBBox, false, expectedX, expectedY, this.widgetSize.height);
       });
-  
+
       test('rightConflict', function() {
         // Anchor placed close to the right side.
         const anchorBBox =

@@ -449,12 +449,16 @@ function test_number_properties() {
   assertEquals(42 % 2 === 0, true, 'even');
   assertEquals(42.1 % 2 === 1, false, 'odd');
   assertEquals(mathIsPrime(5), true, 'prime 5');
+  assertEquals(mathIsPrime(5 + 2), true, 'prime 5 + 2 (extra parentheses)');
   assertEquals(mathIsPrime(25), false, 'prime 25');
   assertEquals(mathIsPrime(-31.1), false, 'prime negative');
   assertEquals(Math.PI % 1 === 0, false, 'whole');
   assertEquals(Infinity > 0, true, 'positive');
+  assertEquals(5 + 2 > 0, true, '5 + 2 is positive (extra parentheses)');
   assertEquals(-42 < 0, true, 'negative');
+  assertEquals(3 + 2 < 0, false, '3 + 2 is negative (extra parentheses)');
   assertEquals(42 % 2 === 0, true, 'divisible');
+  assertEquals(!(42 % 0 === 0), true, 'divisible by 0');
 }
 
 // Tests the "round" block.
@@ -472,7 +476,7 @@ function test_change() {
 }
 
 function mathMean(myList) {
-  return myList.reduce(function(x, y) {return x + y;}) / myList.length;
+  return myList.reduce(function(x, y) {return x + y;}, 0) / myList.length;
 }
 
 function mathMedian(myList) {
@@ -534,7 +538,7 @@ function mathRandomList(list) {
 
 // Tests the "list operation" blocks.
 function test_operations_on_list() {
-  assertEquals([3, 4, 5].reduce(function(x, y) {return x + y;}), 12, 'sum');
+  assertEquals([3, 4, 5].reduce(function(x, y) {return x + y;}, 0), 12, 'sum');
   assertEquals(Math.min.apply(null, [3, 4, 5]), 3, 'min');
   assertEquals(Math.max.apply(null, [3, 4, 5]), 5, 'max');
   assertEquals(mathMean([3, 4, 5]), 4, 'average');
@@ -900,8 +904,8 @@ function test_text_reverse() {
 }
 
 function textReplace(haystack, needle, replacement) {
-  needle = needle.replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g,"\\$1")
-                 .replace(/\x08/g,"\\x08");
+  needle = needle.replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1')
+                 .replace(/\x08/g, '\\x08');
   return haystack.replace(new RegExp(needle, 'g'), replacement);
 }
 
@@ -1331,15 +1335,15 @@ function test_split() {
 
 function listsGetSortCompare(type, direction) {
   var compareFuncs = {
-    "NUMERIC": function(a, b) {
+    'NUMERIC': function(a, b) {
         return Number(a) - Number(b); },
-    "TEXT": function(a, b) {
+    'TEXT': function(a, b) {
         return a.toString() > b.toString() ? 1 : -1; },
-    "IGNORE_CASE": function(a, b) {
+    'IGNORE_CASE': function(a, b) {
         return a.toString().toLowerCase() > b.toString().toLowerCase() ? 1 : -1; },
   };
   var compare = compareFuncs[type];
-  return function(a, b) { return compare(a, b) * direction; }
+  return function(a, b) { return compare(a, b) * direction; };
 }
 
 // Tests the "alphabetic sort" block.

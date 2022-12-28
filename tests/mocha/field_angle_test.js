@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.fieldAngle');
+goog.declareModuleId('Blockly.test.fieldAngle');
 
-const {createTestBlock, defineRowBlock, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import * as Blockly from '../../build/src/core/blockly.js';
+import {assertFieldValue, runConstructorSuiteTests, runFromJsonSuiteTests, runSetValueTests} from './test_helpers/fields.js';
+import {createTestBlock, defineRowBlock} from './test_helpers/block_definitions.js';
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Angle Fields', function() {
@@ -60,7 +63,7 @@ suite('Angle Fields', function() {
    * @param {FieldTemplate} field The field to check.
    */
   const assertFieldDefault = function(field) {
-    testHelpers.assertFieldValue(field, defaultFieldValue);
+    assertFieldValue(field, defaultFieldValue);
   };
   /**
    * Asserts that the field properties are correct based on the test case.
@@ -68,14 +71,14 @@ suite('Angle Fields', function() {
    * @param {!FieldValueTestCase} testCase The test case.
    */
   const validTestCaseAssertField = function(field, testCase) {
-    testHelpers.assertFieldValue(field, testCase.expectedValue);
+    assertFieldValue(field, testCase.expectedValue);
   };
 
-  testHelpers.runConstructorSuiteTests(
+  runConstructorSuiteTests(
       Blockly.FieldAngle, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
-  testHelpers.runFromJsonSuiteTests(
+  runFromJsonSuiteTests(
       Blockly.FieldAngle, validValueTestCases, invalidValueTestCases,
       validTestCaseAssertField, assertFieldDefault);
 
@@ -84,12 +87,12 @@ suite('Angle Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldAngle();
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, defaultFieldValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue(2.5);
-        testHelpers.assertFieldValue(this.field, 2.5);
+        assertFieldValue(this.field, 2.5);
       });
     });
     suite('Value -> New Value', function() {
@@ -97,21 +100,21 @@ suite('Angle Fields', function() {
       setup(function() {
         this.field = new Blockly.FieldAngle(initialValue);
       });
-      testHelpers.runSetValueTests(
+      runSetValueTests(
           validValueTestCases, invalidValueTestCases, initialValue);
       test('With source block', function() {
         this.field.setSourceBlock(createTestBlock());
         this.field.setValue(2.5);
-        testHelpers.assertFieldValue(this.field, 2.5);
+        assertFieldValue(this.field, 2.5);
       });
     });
   });
   suite('Validators', function() {
     setup(function() {
       this.field = new Blockly.FieldAngle(1);
-      this.field.htmlInput_ = Object.create(null);
-      this.field.htmlInput_.oldValue_ = '1';
-      this.field.htmlInput_.untypedDefaultValue_ = 1;
+      this.field.htmlInput_ = document.createElement('input');
+      this.field.htmlInput_.setAttribute('data-old-value', '1');
+      this.field.htmlInput_.setAttribute('data-untyped-default-value', '1');
       this.stub = sinon.stub(this.field, 'resizeEditor_');
     });
     teardown(function() {
@@ -142,12 +145,12 @@ suite('Angle Fields', function() {
           this.field.isBeingEdited_ = true;
           this.field.htmlInput_.value = String(suiteInfo.value);
           this.field.onHtmlInputChange_(null);
-          testHelpers.assertFieldValue(
+          assertFieldValue(
               this.field, suiteInfo.expectedValue, String(suiteInfo.value));
         });
         test('When Not Editing', function() {
           this.field.setValue(suiteInfo.value);
-          testHelpers.assertFieldValue(this.field, suiteInfo.expectedValue);
+          assertFieldValue(this.field, suiteInfo.expectedValue);
         });
       });
     });
@@ -320,7 +323,7 @@ suite('Angle Fields', function() {
     setup(function() {
       this.workspace = new Blockly.Workspace();
       defineRowBlock();
-      
+
       this.assertValue = (value) => {
         const block = this.workspace.newBlock('row_block');
         const field = new Blockly.FieldAngle(value);

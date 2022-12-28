@@ -10,7 +10,7 @@
  */
 'use strict';
 
-goog.module('Blockly.blocks.logic');
+goog.module('Blockly.libraryBlocks.logic');
 
 /* eslint-disable-next-line no-unused-vars */
 const AbstractEvent = goog.requireType('Blockly.Events.Abstract');
@@ -19,20 +19,28 @@ const Extensions = goog.require('Blockly.Extensions');
 const xmlUtils = goog.require('Blockly.utils.xml');
 /* eslint-disable-next-line no-unused-vars */
 const {Block} = goog.requireType('Blockly.Block');
+// const {BlockDefinition} = goog.requireType('Blockly.blocks');
+// TODO (6248): Properly import the BlockDefinition type.
+/* eslint-disable-next-line no-unused-vars */
+const BlockDefinition = Object;
 const {Msg} = goog.require('Blockly.Msg');
 const {Mutator} = goog.require('Blockly.Mutator');
 /* eslint-disable-next-line no-unused-vars */
 const {RenderedConnection} = goog.requireType('Blockly.RenderedConnection');
 /* eslint-disable-next-line no-unused-vars */
 const {Workspace} = goog.requireType('Blockly.Workspace');
-const {defineBlocksWithJsonArray} = goog.require('Blockly.common');
+const {createBlockDefinitionsFromJsonArray, defineBlocks} = goog.require('Blockly.common');
 /** @suppress {extraRequire} */
 goog.require('Blockly.FieldDropdown');
 /** @suppress {extraRequire} */
 goog.require('Blockly.FieldLabel');
 
 
-defineBlocksWithJsonArray([
+/**
+ * A dictionary of the block definitions provided by this module.
+ * @type {!Object<string, !BlockDefinition>}
+ */
+const blocks = createBlockDefinitionsFromJsonArray([
   // Block for boolean data type: true and false.
   {
     'type': 'logic_boolean',
@@ -258,6 +266,7 @@ defineBlocksWithJsonArray([
     'tooltip': '%{BKY_CONTROLS_IF_ELSE_TOOLTIP}',
   },
 ]);
+exports.blocks = blocks;
 
 /**
  * Tooltip text, keyed by block OP value. Used by logic_compare and
@@ -387,7 +396,11 @@ const CONTROLS_IF_MUTATOR_MIXIN = {
     const valueConnections = [null];
     const statementConnections = [null];
     let elseStatementConnection = null;
-    while (clauseBlock && !clauseBlock.isInsertionMarker()) {
+    while (clauseBlock) {
+      if (clauseBlock.isInsertionMarker()) {
+        clauseBlock = clauseBlock.getNextBlock();
+        continue;
+      }
       switch (clauseBlock.type) {
         case 'controls_if_elseif':
           this.elseifCount_++;
@@ -401,8 +414,7 @@ const CONTROLS_IF_MUTATOR_MIXIN = {
         default:
           throw TypeError('Unknown block type: ' + clauseBlock.type);
       }
-      clauseBlock = clauseBlock.nextConnection &&
-          clauseBlock.nextConnection.targetBlock();
+      clauseBlock = clauseBlock.getNextBlock();
     }
     this.updateShape_();
     // Reconnect any child blocks.
@@ -418,6 +430,10 @@ const CONTROLS_IF_MUTATOR_MIXIN = {
     let clauseBlock = containerBlock.nextConnection.targetBlock();
     let i = 1;
     while (clauseBlock) {
+      if (clauseBlock.isInsertionMarker()) {
+        clauseBlock = clauseBlock.getNextBlock();
+        continue;
+      }
       switch (clauseBlock.type) {
         case 'controls_if_elseif': {
           const inputIf = this.getInput('IF' + i);
@@ -438,8 +454,7 @@ const CONTROLS_IF_MUTATOR_MIXIN = {
         default:
           throw TypeError('Unknown block type: ' + clauseBlock.type);
       }
-      clauseBlock = clauseBlock.nextConnection &&
-          clauseBlock.nextConnection.targetBlock();
+      clauseBlock = clauseBlock.getNextBlock();
     }
   },
   /**
@@ -645,3 +660,6 @@ const LOGIC_TERNARY_ONCHANGE_MIXIN = {
 };
 
 Extensions.registerMixin('logic_ternary', LOGIC_TERNARY_ONCHANGE_MIXIN);
+
+// Register provided blocks.
+defineBlocks(blocks);

@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.registry');
+goog.declareModuleId('Blockly.test.registry');
 
-const {assertWarnings, sharedTestSetup, sharedTestTeardown} = goog.require('Blockly.test.helpers');
+import {assertWarnings} from './test_helpers/warnings.js';
+import {sharedTestSetup, sharedTestTeardown} from './test_helpers/setup_teardown.js';
 
 
 suite('Registry', function() {
@@ -25,7 +26,7 @@ suite('Registry', function() {
       Blockly.registry.unregister('test', 'test_name');
     }
   });
-  
+
   suite('Registration', function() {
     test('Simple', function() {
       Blockly.registry.register('test', 'test_name', TestClass);

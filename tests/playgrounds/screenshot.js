@@ -91,11 +91,12 @@ function workspaceToSvg_(workspace, callback, customCss) {
   svgToPng_(data, width, height, callback);
 }
 
+/* eslint-disable no-unused-vars */
 /**
  * Download a screenshot of the blocks on a Blockly workspace.
  * @param {!Blockly.WorkspaceSvg} workspace The Blockly workspace.
  */
-Blockly.downloadScreenshot = function(workspace) {
+function downloadScreenshot(workspace) {
   workspaceToSvg_(workspace, function(datauri) {
     const a = document.createElement('a');
     a.download = 'screenshot.png';
@@ -105,4 +106,5 @@ Blockly.downloadScreenshot = function(workspace) {
     a.click();
     a.parentNode.removeChild(a);
   });
-};
+}
+/* eslint-enable */

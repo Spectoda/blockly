@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('Blockly.test.jsoDeserialization');
+goog.declareModuleId('Blockly.test.jsoDeserialization');
 
-const {assertEventFired, sharedTestSetup, sharedTestTeardown, workspaceTeardown} = goog.require('Blockly.test.helpers');
+import {sharedTestSetup, sharedTestTeardown, workspaceTeardown} from './test_helpers/setup_teardown.js';
+import {assertEventFired} from './test_helpers/events.js';
+import * as eventUtils from '../../build/src/core/events/utils.js';
 
 
 suite('JSO Deserialization', function() {
@@ -38,7 +40,7 @@ suite('JSO Deserialization', function() {
         assertEventFired(
             this.eventsFireStub,
             Blockly.Events.FinishedLoading,
-            {},
+            {type: eventUtils.FINISHED_LOADING},
             this.workspace.id);
       });
 
@@ -58,9 +60,8 @@ suite('JSO Deserialization', function() {
         Blockly.Events.setGroup('my group');
         Blockly.serialization.workspaces.load(state, this.workspace);
         assertEventFired(
-            this.eventsFireStub,
-            Blockly.Events.FinishedLoading,
-            {'group': 'my group'},
+            this.eventsFireStub, Blockly.Events.FinishedLoading,
+            {'group': 'my group', "type": eventUtils.FINISHED_LOADING},
             this.workspace.id);
       });
 
@@ -107,13 +108,12 @@ suite('JSO Deserialization', function() {
         };
         Blockly.serialization.workspaces.load(state, this.workspace);
         assertEventFired(
-            this.eventsFireStub,
-            Blockly.Events.VarCreate,
-            {
+            this.eventsFireStub, Blockly.Events.VarCreate, {
               'varName': 'test',
               'varId': 'testId',
               'varType': '',
               'recordUndo': false,
+              "type": eventUtils.VAR_CREATE,
             },
             this.workspace.id);
       });
@@ -129,13 +129,12 @@ suite('JSO Deserialization', function() {
         };
         Blockly.serialization.workspaces.load(state, this.workspace, {recordUndo: true});
         assertEventFired(
-            this.eventsFireStub,
-            Blockly.Events.VarCreate,
-            {
+            this.eventsFireStub, Blockly.Events.VarCreate, {
               'varName': 'test',
               'varId': 'testId',
               'varType': '',
               'recordUndo': true,
+              "type": eventUtils.VAR_CREATE,
             },
             this.workspace.id);
       });
@@ -152,13 +151,12 @@ suite('JSO Deserialization', function() {
         Blockly.Events.setGroup('my group');
         Blockly.serialization.workspaces.load(state, this.workspace);
         assertEventFired(
-            this.eventsFireStub,
-            Blockly.Events.VarCreate,
-            {
+            this.eventsFireStub, Blockly.Events.VarCreate, {
               'varName': 'test',
               'varId': 'testId',
               'varType': '',
               'group': 'my group',
+              "type": eventUtils.VAR_CREATE,
             },
             this.workspace.id);
       });
@@ -216,9 +214,12 @@ suite('JSO Deserialization', function() {
         }, 0);
         chai.assert.equal(count, 1);
         assertEventFired(
-            this.eventsFireStub,
-            Blockly.Events.VarCreate,
-            {'varName': 'test', 'varId': 'testId', 'varType': ''},
+            this.eventsFireStub, Blockly.Events.VarCreate, {
+              'varName': 'test',
+              'varId': 'testId',
+              'varType': '',
+              "type": eventUtils.VAR_CREATE,
+            },
             this.workspace.id);
       });
     });
@@ -242,7 +243,7 @@ suite('JSO Deserialization', function() {
           assertEventFired(
               this.eventsFireStub,
               Blockly.Events.BlockCreate,
-              {'recordUndo': false},
+              {'recordUndo': false, "type": eventUtils.BLOCK_CREATE},
               this.workspace.id,
               'testId');
         });
@@ -264,7 +265,7 @@ suite('JSO Deserialization', function() {
           assertEventFired(
               this.eventsFireStub,
               Blockly.Events.BlockCreate,
-              {'recordUndo': true},
+              {'recordUndo': true, "type": eventUtils.BLOCK_CREATE},
               this.workspace.id,
               'testId');
         });
@@ -287,7 +288,7 @@ suite('JSO Deserialization', function() {
           assertEventFired(
               this.eventsFireStub,
               Blockly.Events.BlockCreate,
-              {'group': 'my group'},
+              {'group': 'my group', "type": eventUtils.BLOCK_CREATE},
               this.workspace.id,
               'testId');
         });
@@ -348,7 +349,7 @@ suite('JSO Deserialization', function() {
           assertEventFired(
               this.eventsFireStub,
               Blockly.Events.BlockCreate,
-              {},
+              {type: eventUtils.BLOCK_CREATE},
               this.workspace.id,
               'id1');
         });
@@ -383,7 +384,7 @@ suite('JSO Deserialization', function() {
           assertEventFired(
               this.eventsFireStub,
               Blockly.Events.BlockCreate,
-              {'recordUndo': true},
+              {'recordUndo': true, "type": eventUtils.BLOCK_CREATE},
               this.workspace.id,
               'testId');
         });
@@ -400,7 +401,7 @@ suite('JSO Deserialization', function() {
           assertEventFired(
               this.eventsFireStub,
               Blockly.Events.BlockCreate,
-              {'group': 'my group'},
+              {'group': 'my group', "type": eventUtils.BLOCK_CREATE},
               this.workspace.id,
               'testId');
         });
@@ -662,7 +663,7 @@ suite('JSO Deserialization', function() {
 
     Blockly.serialization.workspaces.load(
         {'first': {}, 'third': {}, 'second': {}}, this.workspace);
-    
+
     Blockly.serialization.registry.unregister('first');
     Blockly.serialization.registry.unregister('second');
     Blockly.serialization.registry.unregister('third');
@@ -710,6 +711,310 @@ suite('JSO Deserialization', function() {
       delete Blockly.Blocks['test_block'];
 
       chai.assert.equal(block.someProperty, 'some value');
+    });
+  });
+
+  suite('Procedures', function() {
+    class MockProcedureModel {
+      constructor(workspace, name, id) {
+        this.id = id ?? Blockly.utils.idGenerator.genUid();
+        this.name = name;
+        this.parameters = [];
+        this.returnTypes = null;
+        this.enabled = true;
+      }
+
+      setName(name) {
+        this.name = name;
+        return this;
+      }
+
+      insertParameter(parameterModel, index) {
+        this.parameters.splice(index, 0, parameterModel);
+        return this;
+      }
+
+      deleteParameter(index) {
+        this.parameters.splice(index, 1);
+        return this;
+      }
+
+      setReturnTypes(types) {
+        this.returnTypes = types;
+        return this;
+      }
+
+      setEnabled(enabled) {
+        this.enabled = enabled;
+        return this;
+      }
+
+      getId() {
+        return this.id;
+      }
+
+      getName() {
+        return this.name;
+      }
+
+      getParameter(index) {
+        return this.parameters[index];
+      }
+
+      getParameters() {
+        return [...this.parameters];
+      }
+
+      getReturnTypes() {
+        return this.returnTypes;
+      }
+
+      getEnabled() {
+        return this.enabled;
+      }
+    }
+
+    class MockParameterModel {
+      constructor(workspace, name, id) {
+        this.id = id ?? Blockly.utils.idGenerator.genUid();
+        this.name = name;
+        this.types = [];
+      }
+
+      setName(name) {
+        this.name = name;
+        return this;
+      }
+
+      setTypes(types) {
+        this.types = types;
+        return this;
+      }
+
+      getName() {
+        return this.name;
+      }
+
+      getTypes() {
+        return this.types;
+      }
+
+      getId() {
+        return this.id;
+      }
+    }
+
+    setup(function() {
+      this.procedureSerializer = new
+          Blockly.serialization.procedures.ProcedureSerializer(
+            MockProcedureModel, MockParameterModel);
+      this.procedureMap = this.workspace.getProcedureMap();
+    });
+
+    teardown(function() {
+      this.procedureSerializer = null;
+      this.procedureMap = null;
+    });
+
+    suite('invariant properties', function() {
+      test('the id property is assigned', function() {
+        const jso = {
+          'id': 'test id',
+          'name': 'test name',
+          'returnTypes': [],
+        };
+
+        this.procedureSerializer.load([jso], this.workspace);
+
+        const procedureModel = this.procedureMap.getProcedures()[0];
+        chai.assert.isNotNull(
+            procedureModel, 'Expected a procedure model to exist');
+        chai.assert.equal(
+            procedureModel.getId(),
+            'test id',
+            'Expected the procedure model ID to match the serialized ID');
+      });
+
+      test('the name property is assigned', function() {
+        const jso = {
+          'id': 'test id',
+          'name': 'test name',
+          'returnTypes': [],
+        };
+
+        this.procedureSerializer.load([jso], this.workspace);
+
+        const procedureModel = this.procedureMap.getProcedures()[0];
+        chai.assert.isNotNull(
+            procedureModel, 'Expected a procedure model to exist');
+        chai.assert.equal(
+            procedureModel.getName(),
+            'test name',
+            'Expected the procedure model name to match the serialized name');
+      });
+    });
+
+    suite('return types', function() {
+      test('if the return type property is null it is assigned', function() {
+        const jso = {
+          'id': 'test id',
+          'name': 'test name',
+          'returnTypes': null,
+        };
+
+        this.procedureSerializer.load([jso], this.workspace);
+
+        const procedureModel = this.procedureMap.getProcedures()[0];
+        chai.assert.isNotNull(
+            procedureModel, 'Expected a procedure model to exist');
+        chai.assert.isNull(
+            procedureModel.getReturnTypes(),
+            'Expected the procedure model types to be null');
+      });
+
+      test('if the return type property is an empty array it is assigned', function() {
+        const jso = {
+          'id': 'test id',
+          'name': 'test name',
+          'returnTypes': [],
+        };
+
+        this.procedureSerializer.load([jso], this.workspace);
+
+        const procedureModel = this.procedureMap.getProcedures()[0];
+        chai.assert.isNotNull(
+            procedureModel, 'Expected a procedure model to exist');
+        chai.assert.isArray(
+            procedureModel.getReturnTypes(),
+            'Expected the procedure model types to be an array');
+        chai.assert.isEmpty(
+            procedureModel.getReturnTypes(),
+            'Expected the procedure model types array to be empty');
+      });
+
+      test('if the return type property is a string array it is assigned', function() {
+        const jso = {
+          'id': 'test id',
+          'name': 'test name',
+          'returnTypes': ['test type 1', 'test type 2'],
+        };
+
+        this.procedureSerializer.load([jso], this.workspace);
+
+        const procedureModel = this.procedureMap.getProcedures()[0];
+        chai.assert.isNotNull(
+            procedureModel, 'Expected a procedure model to exist');
+        chai.assert.isArray(
+            procedureModel.getReturnTypes(),
+            'Expected the procedure model types to be an array');
+        chai.assert.deepEqual(
+            procedureModel.getReturnTypes(),
+            ['test type 1', 'test type 2'],
+            'Expected the procedure model types array to be match the ' +
+            'serialized array');
+      });
+    });
+
+    suite('parameters', function() {
+      suite('invariant properties', function() {
+        test('the id property is assigned', function() {
+          const jso = {
+            'id': 'test id',
+            'name': 'test name',
+            'returnTypes': [],
+            'parameters': [
+              {
+                'id': 'test id',
+                'name': 'test name',
+              },
+            ],
+          };
+
+          this.procedureSerializer.load([jso], this.workspace);
+
+          const parameterModel =
+              this.procedureMap.getProcedures()[0].getParameters()[0];
+          chai.assert.isNotNull(
+              parameterModel, 'Expected a parameter model to exist');
+          chai.assert.equal(
+              parameterModel.getId(),
+              'test id',
+              'Expected the parameter model ID to match the serialized ID');
+        });
+
+        test('the name property is assigned', function() {
+          const jso = {
+            'id': 'test id',
+            'name': 'test name',
+            'returnTypes': [],
+            'parameters': [
+              {
+                'id': 'test id',
+                'name': 'test name',
+              },
+            ],
+          };
+
+          this.procedureSerializer.load([jso], this.workspace);
+
+          const parameterModel =
+              this.procedureMap.getProcedures()[0].getParameters()[0];
+          chai.assert.isNotNull(
+              parameterModel, 'Expected a parameter model to exist');
+          chai.assert.equal(
+              parameterModel.getName(),
+              'test name',
+              'Expected the parameter model name to match the serialized name');
+        });
+      });
+
+      suite('types', function() {
+        test('if the type property does not exist, nothing is assigned', function() {
+          const jso = {
+            'id': 'test id',
+            'name': 'test name',
+            'returnTypes': [],
+            'parameters': [
+              {
+                'id': 'test id',
+                'name': 'test name',
+              },
+            ],
+          };
+
+          chai.assert.doesNotThrow(
+            () => {
+              this.procedureMap.getProcedures()[0].getParameters()[0];
+            },
+            'Expected the deserializer to skip the non-existant type property');
+        });
+
+        test('if the type property exists, it is assigned', function() {
+          const jso = {
+            'id': 'test id',
+            'name': 'test name',
+            'returnTypes': [],
+            'parameters': [
+              {
+                'id': 'test id',
+                'name': 'test name',
+                'types': ['test type 1', 'test type 2'],
+              },
+            ],
+          };
+
+          this.procedureSerializer.load([jso], this.workspace);
+
+          const parameterModel =
+              this.procedureMap.getProcedures()[0].getParameters()[0];
+          chai.assert.isNotNull(
+              parameterModel, 'Expected a parameter model to exist');
+          chai.assert.deepEqual(
+              parameterModel.getTypes(),
+              ['test type 1', 'test type 2'],
+              'Expected the parameter model types to match the serialized types');
+        });
+      });
     });
   });
 });
